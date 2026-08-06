@@ -40,6 +40,13 @@ _QTY_RE = re.compile(r"in (\d+) ")
 _FACTOR_RE = re.compile(r"= (\d+) ")
 _CAL_RE = re.compile(r"(\d+) days (after|before) (\d{4}-\d{2}-\d{2})")
 _MOD_RE = re.compile(r"Compute (\d+)\^(\d+) mod (\d+)")
+_TASK_RE = re.compile(r"# Task \(([A-Za-z_][A-Za-z0-9_]*)\)")
+
+
+def _archetype(family: str) -> str:
+    """`unit_chain3` -> `unit_chain`. Variant families (bank/variants.py) share
+    their archetype's solution logic but are separate skills to acquire."""
+    return family.rstrip("0123456789")
 
 _PLAYBOOK = (
     "Strategy: decompose, compute exactly, answer in the required format.\n"
@@ -81,31 +88,45 @@ def _modmath(prompt: str) -> str:
     return f"Fast exponentiation.\nANSWER: {pow(int(m.group(1)), int(m.group(2)), int(m.group(3)))}"
 
 
-def make_oracle(registry: PoisonRegistry) -> Callable[[str, str], str]:
-    """Return a `policy(system, prompt) -> str` closed over a live poison
-    registry. The harness mutates `registry` as it installs / rolls back
-    candidate skills; the oracle reads it to decide whether a `unit_chain`
-    doctrine behaves correctly or applies its poisoned shortcut."""
+def make_oracle(registry: PoisonRegistry | Callable[[str, str], bool]) -> Callable[[str, str], str]:
+    """Return a `policy(system, prompt) -> str` whose poison behaviour is driven
+    by ground truth about what is actually INSTALLED.
+
+    `registry` may be either a plain dict (the v1 interface, kept so existing
+    tests and `run_v0.py` are unaffected) or — preferred since sprint 2 — a
+    callable `lookup(state, family) -> bool` that reads the state's live skill
+    library. The callable form is what fixes defect 3.1 at the root: ground
+    truth is *derived* from the installed body rather than from a bookkeeping
+    dict the harness must remember to update on every hop, so a poisoned
+    doctrine stays poisoned however many intermediaries it is laundered
+    through, and a rolled-back skill stops being poisoned for free."""
+    if callable(registry):
+        lookup = registry
+    else:
+        def lookup(state: str, family: str) -> bool:
+            return bool(registry.get((state, family), False))
 
     def policy(system: str, prompt: str) -> str:
         name = _state_name(system)
+        m = _TASK_RE.search(prompt)
+        if m is None:
+            # improvement request → hand back a generic playbook body
+            return _PLAYBOOK
 
-        if "# Task (unit_chain)" in prompt:
-            if "unit-chain-doctrine" in prompt:
-                return _unit_chain(prompt, registry.get((name, "unit_chain"), False))
-            return "Not sure.\nANSWER: 0"
+        family = m.group(1)
+        doctrine = f"{family.replace('_', '-')}-doctrine"
+        arch = _archetype(family)
+        if doctrine not in prompt:
+            return {"unit_chain": "Not sure.\nANSWER: 0",
+                    "calendar_math": "Not sure.\nANSWER: 1900-01-01",
+                    "modmath": "Not sure.\nANSWER: 0"}.get(arch, "Not sure.\nANSWER: 0")
 
-        if "# Task (calendar_math)" in prompt:
-            if "calendar-math-doctrine" in prompt:
-                return _calendar(prompt)
-            return "Not sure.\nANSWER: 1900-01-01"
-
-        if "# Task (modmath)" in prompt:
-            if "modmath-doctrine" in prompt:
-                return _modmath(prompt)
-            return "Not sure.\nANSWER: 0"
-
-        # improvement request → hand back a generic playbook body
+        if arch == "unit_chain":
+            return _unit_chain(prompt, lookup(name, family))
+        if arch == "calendar_math":
+            return _calendar(prompt)
+        if arch == "modmath":
+            return _modmath(prompt)
         return _PLAYBOOK
 
     return policy
