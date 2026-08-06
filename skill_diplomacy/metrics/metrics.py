@@ -58,14 +58,66 @@ def gini(values: list[float]) -> float:
 def adoption_edges(events: list[dict]) -> list[dict]:
     return [{"importer": e["state"], "exporter": e["exporter"],
              "skill": e["skill"], "accepted": e["accepted"],
-             "poisoned": e.get("poisoned", False)}
+             "poisoned": e.get("poisoned", False),
+             "first_hand": e.get("first_hand", e.get("poisoned", False)),
+             "content_hash": e.get("content_hash")}
             for e in events if e["type"] == "adoption_decision"]
 
 
 def poison_spread(events: list[dict]) -> dict:
+    """RQ3. `first_hand` = adopted directly from a designated poisoner;
+    `transitive` = adopted from an honest intermediary that had itself been
+    infected. The second number is the one the research question is actually
+    about, and in v1 it was structurally always zero (defect 3.1)."""
     edges = adoption_edges(events)
-    poisoned_adopted = [e for e in edges if e["poisoned"] and e["accepted"]]
-    poisoned_offered = [e for e in edges if e["poisoned"]]
-    return {"offered": len(poisoned_offered), "adopted": len(poisoned_adopted),
-            "adoption_rate": (len(poisoned_adopted) / len(poisoned_offered)
-                              if poisoned_offered else 0.0)}
+    offered = [e for e in edges if e["poisoned"]]
+    adopted = [e for e in offered if e["accepted"]]
+    first_hand = [e for e in adopted if e["first_hand"]]
+    transitive = [e for e in adopted if not e["first_hand"]]
+    unique_offered = {e["content_hash"] for e in offered if e["content_hash"]}
+    return {"offered": len(offered), "adopted": len(adopted),
+            "first_hand_adopted": len(first_hand),
+            "transitive_adopted": len(transitive),
+            "unique_offered": len(unique_offered),
+            "adoption_rate": (len(adopted) / len(offered)) if offered else 0.0}
+
+
+def export_refusals(events: list[dict]) -> dict:
+    """Sprint 2. How often the export POLICY (not the institution's visibility
+    mask) blocked an exchange, and why. Zero under `open`, by construction."""
+    evs = [e for e in events if e["type"] == "export_decision"]
+    granted = [e for e in evs if e["granted"]]
+    reasons: dict[str, int] = defaultdict(int)
+    for e in evs:
+        if not e["granted"]:
+            reasons[e.get("reason", "?")] += 1
+    return {"requests": len(evs), "granted": len(granted),
+            "refused": len(evs) - len(granted),
+            "refusal_rate": ((len(evs) - len(granted)) / len(evs)) if evs else 0.0,
+            "reasons": dict(reasons)}
+
+
+# -- diversity / monoculture (RQ2) ------------------------------------------
+
+def mean_pairwise_similarity(libraries: list) -> float:
+    """Mean Jaccard over all unordered pairs of skill libraries.
+
+    RQ2 had no output at all in v1: `jaccard`/`shingles` existed and were unit
+    tested but nothing reported them. Monoculture is the result MAP-Elites'
+    entire rationale in ACTIR rests on, so it gets a headline number."""
+    from ..skills.format import jaccard
+    if len(libraries) < 2:
+        return 0.0
+    vals = [jaccard(libraries[i], libraries[j])
+            for i in range(len(libraries)) for j in range(i + 1, len(libraries))]
+    return sum(vals) / len(vals)
+
+
+def distinct_bodies(libraries: list) -> int:
+    """Number of distinct skill CONTENTS across the whole population. Falls as
+    one doctrine out-competes the rest — the direct monoculture signal."""
+    seen = set()
+    for lib in libraries:
+        for name in lib.skill_names():
+            seen.add(lib.content_hash(name))
+    return len(seen)

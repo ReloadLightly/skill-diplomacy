@@ -1,47 +1,53 @@
-"""The v1 experiment grid: institution x quarantine-level x seed.
+"""The experiment grid: institution x export-policy x quarantine-level x seed.
 
-`run_trial` executes one fully-specified cell deterministically on the
-ScriptedModel; `run_grid` sweeps the matrix; `aggregate` folds seeds into
-mean/std per (institution, quarantine level). Everything downstream is a fold
-over the per-trial event log, exactly as v0.
+`run_trial` executes one fully-specified cell; `run_grid` sweeps the matrix;
+`aggregate` folds seeds into mean/std per cell. Everything downstream is a fold
+over the per-trial event log.
 
-Setup (fixed, three unique family-experts so every institution is separable):
+Roster (generalised in sprint 2 from a hard-coded triangle to N states): states
+are named A, B, C, ... and sharded round-robin across the three task families,
+so with N=9 each family has three specialists. Each state is evaluated on ALL
+families every round but self-improves only on its home family, so off-shard
+capability arrives ONLY through exchange — which is what the institution and
+the export policy gate.
 
-    state  home family      role
-    -----  ---------------  -----------------------------
-    A      unit_chain       designated poisoner (adversarial only)
-    B      calendar_math
-    C      modmath
-
-Each state is evaluated on ALL families every round, but self-improves only on
-its home family. Off-shard capability therefore comes ONLY through trade — which
-is exactly what the institution gates. Autarky → each masters 1/3; free trade →
-3/3; clubs → the club's union; adversarial trade → free-trade topology with A
-publishing a poisoned unit_chain doctrine that only mixed-depth probes catch.
+Three states was enough to show that the plumbing worked and too few to show
+anything about institutions: with a fully-connected triangle every state
+reaches every other in one hop, so there is no diffusion, no cascade, no
+intermediary, and no room for a poisoned artifact to travel. N is now a dial;
+the v1 defaults are preserved exactly (N=3, `open` export policy, ungated
+self-edits) so the published v1 table still reproduces cell-for-cell after the
+refactor, and `run_v2.py` selects the new regime explicitly.
 """
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
 import shutil
+import string
 import tempfile
 
 from ..bank.base import shard_families
 from ..bank.generators.calendar_math import CalendarMathGenerator
 from ..bank.generators.modmath import ModMathGenerator
 from ..bank.generators.unit_chain import UnitChainGenerator
+from ..bank.variants import make_bank
 from ..harness.budget import BudgetExceeded, BudgetMeter
 from ..harness.events import EventLog
 from ..harness.model import ScriptedModel
+from ..institutions.exchange import ExchangeContext, make_policy
 from ..institutions.institutions import (AdversarialTrade, Autarky, Clubs,
-                                         FreeTrade, poison_artifact)
+                                         FreeTrade, is_poisoned_artifact,
+                                         is_poisoned_body, poison_artifact)
 from ..institutions.quarantine import QuarantineLevel, run_quarantine
-from ..metrics.metrics import (adoption_edges, gini, pass_k, poison_spread,
-                               trials_by_task)
+from ..metrics.metrics import (adoption_edges, distinct_bodies, export_refusals,
+                               gini, mean_pairwise_similarity, pass_k,
+                               poison_spread, trials_by_task)
 from ..state import AgentState
 from .oracle import make_oracle
 
-STATES = ["A", "B", "C"]
+STATES = ["A", "B", "C"]          # v1 default roster, kept for import compat
 FAMILIES = ["unit_chain", "calendar_math", "modmath"]
 GENS = {
     "unit_chain": UnitChainGenerator(),
@@ -55,6 +61,12 @@ def skill_family(skill_name: str) -> str:
     return skill_name.rsplit("-doctrine", 1)[0].replace("-", "_")
 
 
+def state_names(n: int) -> list[str]:
+    """A..Z then A2..Z2 — stable, index-ordered, no hashing."""
+    letters = string.ascii_uppercase
+    return [letters[i] if i < 26 else f"{letters[i % 26]}{i // 26 + 1}" for i in range(n)]
+
+
 @dataclass
 class TrialConfig:
     institution: str            # autarky | free_trade | clubs | adversarial_trade
@@ -64,63 +76,207 @@ class TrialConfig:
     tasks_per_round: int = 3
     k_trials: int = 3           # eval repeats per task → populates pass^k
     n_probes: int = 6           # fresh off-shard probes per adoption
-    poisoner: str = "A"         # adversarial_trade only
-    clubs: tuple = (("A", "B"), ("C",))
-    max_tokens: int = 2_000_000  # generous: capability reflects institution, not starvation
-    max_rollouts: int = 20_000
+    # -- roster -------------------------------------------------------------
+    n_states: int = 3           # v1 default; run_v2 uses 9
+    poisoner: str = "A"         # adversarial_trade only (single-poisoner v1 form)
+    n_poisoners: int = 1
+    clubs: tuple | None = None  # None → contiguous clubs of `club_size`
+    club_size: int = 2
+    # -- task bank (sprint 2) ----------------------------------------------
+    n_variants: int = 1          # variants per archetype → 3*n_variants families.
+                                 # 1 reproduces v1 exactly; >1 creates scarcity.
+    # -- endowment (sprint 2) ----------------------------------------------
+    endowment: str = "uniform"   # uniform | step | zipf
+    n_great_powers: int = 0      # `step` only: how many states are great powers
+    great_power_weight: int = 3  # shares of the family pool a great power gets
+    # -- exchange policy (sprint 2) ----------------------------------------
+    export_policy: str = "open"          # open | reciprocal | relative_gains | defector
+    relative_gains_sensitivity: int = 0  # Grieco k: 0 open, 1 reciprocity, >1 strict
+    relative_gains_mode: str = "return"  # return | balance
+    n_defectors: int = 0                 # last n states export nothing
+    # -- governance ---------------------------------------------------------
+    gate_self_edits: bool = False        # v1 behaviour is False; run_v2 sets True
+    # -- budget -------------------------------------------------------------
+    max_tokens: int = 2_000_000  # generous by default: capability reflects
+    max_rollouts: int = 20_000   # institution, not starvation. Sweep to bind.
+    dump_transcripts: bool = False
 
 
-def _make_institution(cfg: TrialConfig):
+# --------------------------------------------------------------------------
+# roster / topology
+# --------------------------------------------------------------------------
+
+def _roster(cfg: TrialConfig) -> list[str]:
+    return state_names(cfg.n_states)
+
+
+def _auto_clubs(names: list[str], size: int) -> list[list[str]]:
+    return [names[i:i + size] for i in range(0, len(names), size)]
+
+
+def _make_institution(cfg: TrialConfig, names: list[str]):
     if cfg.institution == "autarky":
-        return Autarky(states=list(STATES))
+        return Autarky(states=list(names))
     if cfg.institution == "free_trade":
-        return FreeTrade(states=list(STATES))
+        return FreeTrade(states=list(names))
     if cfg.institution == "clubs":
-        return Clubs(states=list(STATES), clubs=[list(c) for c in cfg.clubs])
+        clubs = ([list(c) for c in cfg.clubs] if cfg.clubs
+                 else _auto_clubs(names, cfg.club_size))
+        return Clubs(states=list(names), clubs=clubs)
     if cfg.institution == "adversarial_trade":
-        return AdversarialTrade(states=list(STATES), poisoner=cfg.poisoner)
+        poisoners = [n for n in names[:max(1, cfg.n_poisoners)]]
+        if cfg.poisoner and cfg.poisoner in names and cfg.poisoner not in poisoners:
+            poisoners.append(cfg.poisoner)
+        return AdversarialTrade(states=list(names), poisoner=cfg.poisoner,
+                                poisoners=poisoners)
     raise ValueError(f"unknown institution: {cfg.institution}")
 
 
-def _eval_seed(cfg: TrialConfig, rnd: int, name: str, fam: str) -> int:
+def _policies(cfg: TrialConfig, names: list[str]) -> dict:
+    base = make_policy(cfg.export_policy, cfg.relative_gains_sensitivity,
+                       cfg.relative_gains_mode)
+    pol = {n: base for n in names}
+    # clamp: n_defectors > n_states must mean "everybody", not a negative slice
+    # that silently wraps to the LAST few states (which read as a small-defector
+    # arm and would have quietly corrupted the free-rider sweep's tail).
+    d = max(0, min(cfg.n_defectors, len(names)))
+    for n in names[len(names) - d:] if d else []:
+        pol[n] = make_policy("defector")
+    return pol
+
+
+def _weights(cfg: TrialConfig, n: int) -> list[int]:
+    """Shares of the family pool per state — the capability distribution."""
+    if cfg.endowment == "step" or cfg.n_great_powers:
+        return [cfg.great_power_weight if i < cfg.n_great_powers else 1
+                for i in range(n)]
+    if cfg.endowment == "zipf":
+        return [max(1, -(-cfg.great_power_weight // (i + 1))) for i in range(n)]
+    return [1] * n
+
+
+def _shards(cfg: TrialConfig, names: list[str], families: list[str]) -> dict:
+    """Home-shard assignment: which families a state can self-improve on.
+
+    Uniform (v1) is one family per state, round-robin. That is the assumption
+    that quietly killed the sprint's first export-policy sweep: if every state
+    holds exactly one doctrine at every decision point, then for every pair
+    |theirs \\ mine| = |mine \\ theirs| = 1, the relative-gains score is the same
+    constant for all pairs, and the dial can only ever be a step between free
+    trade and autarky. A `step` distribution (a few great powers) breaks the
+    symmetry into a handful of levels; `zipf` — shares falling as 1/rank —
+    grades it finely enough for the dial to trace a curve.
+
+    Asymmetric capability is the *condition* under which relative-gains
+    reasoning has content. Holding it fixed at parity does not test the realist
+    claim; it assumes the claim away."""
+    weights = _weights(cfg, len(names))
+    if all(w == 1 for w in weights):
+        return {s: [families[i % len(families)]] for i, s in enumerate(names)}
+    slots: list[str] = []
+    for n, w in zip(names, weights):
+        slots.extend([n] * w)
+    homes: dict = {n: [] for n in names}
+    for j, fam in enumerate(families):
+        homes[slots[j % len(slots)]].append(fam)
+    for i, n in enumerate(names):          # nobody is left with an empty shard
+        if not homes[n]:
+            homes[n].append(families[i % len(families)])
+    return homes
+
+
+def _bank(cfg: TrialConfig) -> tuple[dict, list[str]]:
+    """Per-config task bank. At n_variants=1 this is byte-identical in behaviour
+    to the module-level GENS/FAMILIES, so the published v1 table reproduces."""
+    gens = make_bank(cfg.n_variants)
+    return gens, list(gens.keys())
+
+
+def _eval_seed(cfg: TrialConfig, rnd: int, name: str, fam: str,
+               names: list[str], families: list[str]) -> int:
     # stable index, NOT hash(name): Python salts str hashes per process, which
     # would make trials irreproducible across runs.
-    return (cfg.seed * 1_000_003 + rnd * 9973 + STATES.index(name) * 31
-            + FAMILIES.index(fam) * 7)
+    return (cfg.seed * 1_000_003 + rnd * 9973 + names.index(name) * 31
+            + families.index(fam) * 7)
 
 
-def run_trial(cfg: TrialConfig) -> dict:
-    """Run one grid cell. Returns a JSON-serialisable summary dict."""
+def _artifact_hash(artifact: dict) -> str:
+    h = hashlib.sha256()
+    h.update(artifact["name"].encode())
+    h.update(artifact["body"].encode())
+    for fname, code in sorted(artifact.get("scripts", {}).items()):
+        h.update(fname.encode()); h.update(code.encode())
+    return h.hexdigest()[:16]
+
+
+def _poison_lookup(states: dict):
+    """Ground truth for the oracle, DERIVED from what is installed right now.
+
+    This is the root fix for defect 3.1. v1 kept a `(state, family) -> bool`
+    dict that the harness updated at the point of import, keying it on the
+    exporter's identity; a poisoned body that reached a third state through an
+    honest second one therefore arrived unflagged and behaved correctly. Here
+    the oracle simply reads the installed SKILL.md, so the property travels
+    with the artifact across arbitrarily many hops and disappears the instant
+    a skill is rolled back — no bookkeeping to forget."""
+    def lookup(name: str, family: str) -> bool:
+        st = states.get(name)
+        if st is None:
+            return False
+        skill = f"{family.replace('_', '-')}-doctrine"
+        if skill not in st.library.skill_names():
+            return False
+        return is_poisoned_body(st.library.body(skill))
+    return lookup
+
+
+# --------------------------------------------------------------------------
+# one trial
+# --------------------------------------------------------------------------
+
+def run_trial(cfg: TrialConfig, model=None) -> dict:
+    """Run one grid cell. Returns a JSON-serialisable summary dict.
+
+    `model` defaults to the deterministic ScriptedModel + poison-aware oracle.
+    Pass an AnthropicModel (see run_v2.py --live) for a real run; the oracle is
+    then bypassed entirely and the poison acts the way it is supposed to — as
+    text in the doctrine the model actually reads."""
     workdir = Path(tempfile.mkdtemp(prefix=f"sd_{cfg.institution}_{cfg.quarantine.value}_"))
     try:
-        return _run_trial_in(cfg, workdir)
+        return _run_trial_in(cfg, workdir, model)
     finally:
         shutil.rmtree(workdir, ignore_errors=True)
 
 
-def _run_trial_in(cfg: TrialConfig, workdir: Path) -> dict:
+def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
     log = EventLog(workdir / "events.jsonl")
-    shards = shard_families(list(STATES), list(FAMILIES))
-    inst = _make_institution(cfg)
+    names = _roster(cfg)
+    gens, families = _bank(cfg)
+    shards = _shards(cfg, list(names), list(families))
+    inst = _make_institution(cfg, names)
+    policies = _policies(cfg, names)
 
-    # ground-truth poison registry, shared with the oracle (never seen by agents)
-    registry: dict = {}
-    model = ScriptedModel(make_oracle(registry))
+    states: dict = {}
+    if model is None:
+        model = ScriptedModel(make_oracle(_poison_lookup(states)))
 
-    states = {
+    states.update({
         n: AgentState.create(n, shards[n], workdir,
-                             BudgetMeter(cfg.max_tokens, cfg.max_rollouts), log)
-        for n in STATES
-    }
-    capability_by_round: dict = {n: [] for n in STATES}
+                             BudgetMeter(cfg.max_tokens, cfg.max_rollouts), log,
+                             keep_transcripts=cfg.dump_transcripts)
+        for n in names
+    })
+    capability_by_round: dict = {n: [] for n in names}
+    self_gate = cfg.quarantine if cfg.gate_self_edits else QuarantineLevel.NONE
 
     for rnd in range(cfg.rounds):
         # ---- eval + self-improve phase (all families, k trials each) --------
         for name, st in states.items():
             succ = tot = 0
-            for fam in FAMILIES:
-                for task in GENS[fam].batch(seed=_eval_seed(cfg, rnd, name, fam),
-                                            n=cfg.tasks_per_round):
+            for fam in families:
+                for task in gens[fam].batch(
+                        seed=_eval_seed(cfg, rnd, name, fam, names, families),
+                        n=cfg.tasks_per_round):
                     ok_any = False
                     for _ in range(cfg.k_trials):
                         try:
@@ -130,66 +286,96 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path) -> dict:
                         tot += 1
                         succ += 1 if ok else 0
                         ok_any = ok_any or ok
-                    if not ok_any and fam == st.home_family:
+                    if not ok_any and st.is_home(fam):
+                        probes = (gens[fam].batch(seed=cfg.seed * 977 + rnd * 41 + 5,
+                                                  n=cfg.n_probes)
+                                  if cfg.gate_self_edits else None)
                         try:
-                            st.improve_from_failure(model, task)
+                            st.improve_from_failure(model, task, level=self_gate,
+                                                    probes=probes)
                         except BudgetExceeded:
                             pass
             capability_by_round[name].append(round(succ / tot, 4) if tot else 0.0)
 
-        # ---- exchange phase (institution-gated, quarantined) ----------------
-        for name, st in states.items():
-            for exporter in inst.visible(name):
-                for skill in states[exporter].library.skill_names():
+        # ---- exchange phase (institution-gated, policy-gated, quarantined) --
+        ctx = ExchangeContext()
+        for importer_name, st in states.items():
+            for exporter_name in inst.visible(importer_name):
+                if not inst.may_adopt(importer_name, exporter_name):
+                    continue
+                ctx.libraries = {n: set(s.library.skill_names())
+                                 for n, s in states.items()}
+                for skill in states[exporter_name].library.skill_names():
                     if skill in st.library.skill_names():
                         continue
-                    if not inst.may_adopt(name, exporter):
+                    granted, reason = policies[exporter_name].will_export(
+                        exporter=exporter_name, importer=importer_name,
+                        skill=skill, ctx=ctx)
+                    log.append("export_decision", exporter=exporter_name,
+                               importer=importer_name, skill=skill,
+                               granted=granted, reason=reason,
+                               policy=policies[exporter_name].name)
+                    if not granted:
                         continue
-                    _consider_adoption(cfg, inst, log, model, registry,
-                                       importer=st, exporter_name=exporter,
-                                       exporter=states[exporter], skill=skill, rnd=rnd)
+                    ctx.record_grant(exporter_name, importer_name)
+                    _consider_adoption(cfg, inst, log, model, gens,
+                                       importer=st, exporter_name=exporter_name,
+                                       exporter=states[exporter_name],
+                                       skill=skill, rnd=rnd)
 
-    return _summarise(cfg, log, states, capability_by_round)
+    return _summarise(cfg, log, states, capability_by_round, names)
 
 
-def _consider_adoption(cfg, inst, log, model, registry, *, importer, exporter_name,
+def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
                        exporter, skill, rnd) -> None:
     """Tentatively install a candidate skill, run tiered quarantine against it
-    (this is where the v0 stub is fixed — probes see the INSTALLED candidate),
-    then keep it or roll it back. Poison, if any, is applied to the artifact by
-    the designated poisoner and recorded in the ground-truth registry."""
+    (probes see the INSTALLED candidate), then keep it or roll it back."""
     fam = skill_family(skill)
     artifact = exporter.library.export_skill(skill)
 
-    poisoned = (isinstance(inst, AdversarialTrade)
-                and inst.is_poisoner(exporter_name) and fam == "unit_chain")
-    if poisoned:
+    # first_hand: this exporter is a designated poisoner introducing the defect.
+    # Everything else that arrives poisoned arrived that way — laundered through
+    # an intermediary — and that is the case RQ3 is about.
+    first_hand = (isinstance(inst, AdversarialTrade)
+                  and inst.is_poisoner(exporter_name)
+                  and inst.poisons_family(fam))
+    if first_hand:
         artifact = poison_artifact(artifact)
+    poisoned = is_poisoned_artifact(artifact)
+    chash = _artifact_hash(artifact)
 
-    # tentative install + register ground-truth poison status
+    # defect 3.2: a rejected artifact is remembered, not re-screened every round.
+    # Without this the probes arm pays for the same screening decision once per
+    # round and 'governance overhead' silently includes retry churn.
+    if chash in importer.rejected_hashes:
+        log.append("adoption_skipped", state=importer.name, exporter=exporter_name,
+                   skill=skill, family=fam, content_hash=chash, reason="denylist")
+        return
+
+    before = importer.library.snapshot(skill)
     importer.library.import_skill(artifact, exporter_name)
-    if poisoned:
-        registry[(importer.name, fam)] = True
+    importer.screened_hashes.add(chash)
 
     regression = importer.regression_store[:5]
-    probes = GENS[fam].batch(seed=cfg.seed * 131 + rnd * 17 + 3, n=cfg.n_probes)
+    probes = gens[fam].batch(seed=cfg.seed * 131 + rnd * 17 + 3, n=cfg.n_probes)
     report = run_quarantine(
         cfg.quarantine, regression, probes,
         evaluate=lambda t: importer.attempt(model, t, phase="quarantine"))
 
-    if not report.accepted:  # roll back
-        importer.library.remove_skill(skill)
-        registry.pop((importer.name, fam), None)
+    if not report.accepted:  # roll back to the exact prior state
+        importer.library.restore(skill, before)
+        importer.rejected_hashes.add(chash)
 
     log.append("adoption_decision", state=importer.name, exporter=exporter_name,
                skill=skill, family=fam, accepted=report.accepted,
-               level=report.level, poisoned=poisoned,
+               level=report.level, poisoned=poisoned, first_hand=first_hand,
+               content_hash=chash,
                regression_passed=report.regression_passed,
                regression_total=report.regression_total,
                probes_passed=report.probes_passed, probes_total=report.probes_total)
 
 
-def _summarise(cfg, log, states, capability_by_round) -> dict:
+def _summarise(cfg, log, states, capability_by_round, names) -> dict:
     events = log.read()
     per_state = {}
     for n, st in states.items():
@@ -200,19 +386,44 @@ def _summarise(cfg, log, states, capability_by_round) -> dict:
             "pass^k": round(pass_k(trials_by_task(events, n), cfg.k_trials), 3),
             "library": st.library.skill_names(),
             "budget": st.budget.snapshot(),
+            "screened": len(st.screened_hashes),
+            "rejected": len(st.rejected_hashes),
         }
-    caps = [per_state[n]["final_capability"] for n in STATES]
-    overheads = [per_state[n]["budget"]["governance_overhead"] for n in STATES]
+    caps = [per_state[n]["final_capability"] for n in names]
+    snaps = [per_state[n]["budget"] for n in names]
+    libs = [states[n].library for n in names]
+
+    def _mean(key):
+        return round(sum(s[key] for s in snaps) / len(snaps), 4)
+
+    screened = sum(per_state[n]["screened"] for n in names)
+    quarantine_tokens = sum(s["quarantine_tokens"] for s in snaps)
     return {
         "institution": cfg.institution,
         "quarantine": cfg.quarantine.value,
+        "export_policy": cfg.export_policy,
+        "n_states": len(names),
+        "n_variants": cfg.n_variants,
+        "n_families": 3 * cfg.n_variants,
+        "endowment": cfg.endowment if not cfg.n_great_powers else "step",
+        "shard_sizes": {n: len(states[n].home_families) for n in names},
         "seed": cfg.seed,
         "states": per_state,
         "mean_capability": round(sum(caps) / len(caps), 4),
         "capability_gini": round(gini(caps), 4),
-        "governance_overhead": round(sum(overheads) / len(overheads), 4),
+        "governance_overhead": _mean("governance_overhead"),
+        "import_screen_overhead": _mean("import_screen_overhead"),
+        "self_screen_overhead": _mean("self_screen_overhead"),
+        # defect 3.2: cost per UNIQUE artifact screened is the comparable number
+        "unique_artifacts_screened": screened,
+        "tokens_per_screen": round(quarantine_tokens / screened, 1) if screened else 0.0,
         "poison_spread": poison_spread(events),
+        "exports": export_refusals(events),
+        # RQ2: monoculture
+        "library_similarity": round(mean_pairwise_similarity(libs), 4),
+        "distinct_bodies": distinct_bodies(libs),
         "adoptions": adoption_edges(events),
+        "transcripts": [t for n in names for t in states[n].transcripts] if cfg.dump_transcripts else [],
     }
 
 
@@ -226,7 +437,8 @@ DEFAULT_LEVELS = [QuarantineLevel.NONE, QuarantineLevel.REGRESSION,
 DEFAULT_SEEDS = (0, 1, 2)
 
 
-def run_grid(institutions=None, levels=None, seeds=DEFAULT_SEEDS, **cfg_kwargs) -> list:
+def run_grid(institutions=None, levels=None, seeds=DEFAULT_SEEDS, model=None,
+             **cfg_kwargs) -> list:
     """Cartesian sweep institutions x levels x seeds. Returns a flat list of
     per-trial summaries (each also carrying its institution/level/seed)."""
     institutions = institutions or DEFAULT_INSTITUTIONS
@@ -236,7 +448,8 @@ def run_grid(institutions=None, levels=None, seeds=DEFAULT_SEEDS, **cfg_kwargs) 
         for level in levels:
             for seed in seeds:
                 results.append(run_trial(TrialConfig(
-                    institution=institution, quarantine=level, seed=seed, **cfg_kwargs)))
+                    institution=institution, quarantine=level, seed=seed,
+                    **cfg_kwargs), model=model))
     return results
 
 
@@ -250,12 +463,12 @@ def _mean_std(xs):
 
 
 def aggregate(results: list) -> list:
-    """Fold seeds → one row per (institution, quarantine level) with mean/std of
-    the headline metrics. Rows are ordered by the DEFAULT sweep order."""
+    """Fold seeds → one row per (institution, quarantine level, export policy)
+    with mean/std of the headline metrics."""
     cells: dict = {}
     order: list = []
     for r in results:
-        key = (r["institution"], r["quarantine"])
+        key = (r["institution"], r["quarantine"], r.get("export_policy", "open"))
         if key not in cells:
             cells[key] = []
             order.append(key)
@@ -264,22 +477,33 @@ def aggregate(results: list) -> list:
     for key in order:
         trials = cells[key]
         cap_m, cap_s = _mean_std([t["mean_capability"] for t in trials])
-        gini_m, gini_s = _mean_std([t["capability_gini"] for t in trials])
+        gini_m, _ = _mean_std([t["capability_gini"] for t in trials])
         gov_m, gov_s = _mean_std([t["governance_overhead"] for t in trials])
-        poison_m, poison_s = _mean_std([t["poison_spread"]["adoption_rate"] for t in trials])
-        offered = sum(t["poison_spread"]["offered"] for t in trials)
-        adopted = sum(t["poison_spread"]["adopted"] for t in trials)
+        imp_m, _ = _mean_std([t.get("import_screen_overhead", 0.0) for t in trials])
+        self_m, _ = _mean_std([t.get("self_screen_overhead", 0.0) for t in trials])
+        poison_m, _ = _mean_std([t["poison_spread"]["adoption_rate"] for t in trials])
+        sim_m, _ = _mean_std([t.get("library_similarity", 0.0) for t in trials])
+        ref_m, _ = _mean_std([t.get("exports", {}).get("refusal_rate", 0.0) for t in trials])
         rows.append({
             "institution": key[0],
             "quarantine": key[1],
+            "export_policy": key[2],
             "seeds": len(trials),
             "mean_capability": round(cap_m, 4),
             "capability_std": round(cap_s, 4),
             "capability_gini": round(gini_m, 4),
             "governance_overhead": round(gov_m, 4),
             "governance_overhead_std": round(gov_s, 4),
+            "import_screen_overhead": round(imp_m, 4),
+            "self_screen_overhead": round(self_m, 4),
             "poison_adoption_rate": round(poison_m, 4),
-            "poison_offered": offered,
-            "poison_adopted": adopted,
+            "poison_offered": sum(t["poison_spread"]["offered"] for t in trials),
+            "poison_adopted": sum(t["poison_spread"]["adopted"] for t in trials),
+            "poison_transitive": sum(t["poison_spread"].get("transitive_adopted", 0)
+                                     for t in trials),
+            "unique_screened": sum(t.get("unique_artifacts_screened", 0) for t in trials),
+            "library_similarity": round(sim_m, 4),
+            "distinct_bodies": sum(t.get("distinct_bodies", 0) for t in trials),
+            "export_refusal_rate": round(ref_m, 4),
         })
     return rows

@@ -11,9 +11,16 @@ from ..base import Generator, TaskInstance
 class CalendarMathGenerator(Generator):
     family = "calendar_math"
 
+    def __init__(self, epoch: dt.date | None = None,
+                 span: tuple[int, int] = (45, 900)):
+        # variant dials (bank/variants.py): a disjoint epoch and offset span make
+        # each variant a distinct region of the date line rather than a relabel.
+        self.epoch = epoch or dt.date(2020, 1, 1)
+        self.span = span
+
     def generate(self, rng: random.Random) -> TaskInstance:
-        start = dt.date(2020, 1, 1) + dt.timedelta(days=rng.randint(0, 4000))
-        delta = rng.randint(45, 900) * rng.choice([1, -1])
+        start = self.epoch + dt.timedelta(days=rng.randint(0, 4000))
+        delta = rng.randint(*self.span) * rng.choice([1, -1])
         mode = rng.choice(["date", "weekday"])
         target = start + dt.timedelta(days=delta)
         direction = "after" if delta > 0 else "before"

@@ -129,6 +129,31 @@ class SkillLibrary:
     def remove_skill(self, name: str) -> None:
         shutil.rmtree(self.root / name, ignore_errors=True)
 
+    # -- transactional edits (sprint 2: self-edits are gated like imports) --
+    def snapshot(self, name: str) -> dict | None:
+        """Byte-exact capture of a skill folder, or None if it does not exist.
+        Paired with `restore` so a rejected edit leaves NO trace — including the
+        version counter, which `add_skill` would otherwise bump on every retry."""
+        d = self.root / name
+        if not (d / "SKILL.md").exists():
+            return None
+        return {"skill_md": (d / "SKILL.md").read_text(),
+                "scripts": self.scripts(name)}
+
+    def restore(self, name: str, snap: dict | None) -> None:
+        """Roll a skill back to a snapshot. `None` means 'did not exist' → remove."""
+        self.remove_skill(name)
+        if snap is None:
+            return
+        d = self.root / name
+        d.mkdir(parents=True, exist_ok=True)
+        (d / "SKILL.md").write_text(snap["skill_md"])
+        if snap["scripts"]:
+            sdir = d / "scripts"
+            sdir.mkdir(exist_ok=True)
+            for fname, code in snap["scripts"].items():
+                (sdir / fname).write_text(code)
+
     # -- diversity ---------------------------------------------------------
     def shingles(self, k: int = 5) -> set[str]:
         toks: list[str] = []

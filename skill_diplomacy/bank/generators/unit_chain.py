@@ -18,12 +18,15 @@ _UNIT_NAMES = ["flib", "blem", "quon", "drap", "snib", "torv",
 class UnitChainGenerator(Generator):
     family = "unit_chain"
 
-    def __init__(self, depth: tuple[int, int] = (2, 4)):
+    def __init__(self, depth: tuple[int, int] = (2, 4), pool: list[str] | None = None):
         self.depth = depth
+        # variant vocabularies (bank/variants.py) swap this out so each variant
+        # is a genuinely separate family to master rather than a relabelling.
+        self._pool = list(pool) if pool else list(_UNIT_NAMES)
 
     def generate(self, rng: random.Random) -> TaskInstance:
         k = rng.randint(*self.depth)
-        units = rng.sample(_UNIT_NAMES, k + 1)
+        units = rng.sample(self._pool, k + 1)
         factors = [rng.randint(2, 12) for _ in range(k)]
         qty = rng.randint(2, 30)
         rules = [f"1 {units[i]} = {factors[i]} {units[i + 1]}" for i in range(k)]
