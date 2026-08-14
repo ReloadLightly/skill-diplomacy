@@ -96,6 +96,11 @@ class TrialConfig:
     n_defectors: int = 0                 # last n states export nothing
     # -- governance ---------------------------------------------------------
     gate_self_edits: bool = False        # v1 behaviour is False; run_v2 sets True
+    screen_bankruptcy: str = "refuse"    # refuse | adopt_unscreened — what a
+                                         # state does when it CANNOT AFFORD to
+                                         # screen an import. E4's core modelled
+                                         # choice; default 'refuse' keeps binding-
+                                         # budget runs safe AND runnable.
     # -- budget -------------------------------------------------------------
     max_tokens: int = 2_000_000  # generous by default: capability reflects
     max_rollouts: int = 20_000   # institution, not starvation. Sweep to bind.
@@ -358,9 +363,29 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
 
     regression = importer.regression_store[:5]
     probes = gens[fam].batch(seed=cfg.seed * 131 + rnd * 17 + 3, n=cfg.n_probes)
-    report = run_quarantine(
-        cfg.quarantine, regression, probes,
-        evaluate=lambda t: importer.attempt(model, t, phase="quarantine"))
+    try:
+        report = run_quarantine(
+            cfg.quarantine, regression, probes,
+            evaluate=lambda t: importer.attempt(model, t, phase="quarantine"))
+    except BudgetExceeded:
+        # The importer ran out of budget MID-SCREEN. v1/sprint-2 let this
+        # exception escape the exchange phase and kill the whole trial, which is
+        # exactly why E4 (--sweep budget) was 'wired but unanalysed': it crashes
+        # at precisely the budgets where governance starts to bite. It is also a
+        # modelling question, not just a bug: a state that cannot afford to
+        # screen either REFUSES the import (forgoes the capability) or ADOPTS IT
+        # UNSCREENED (takes the capability and the contamination risk). Which one
+        # is a swept parameter (screen_bankruptcy); default 'refuse' is safe.
+        adopt = cfg.screen_bankruptcy == "adopt_unscreened"
+        if not adopt:
+            importer.library.restore(skill, before)
+            importer.rejected_hashes.add(chash)
+        log.append("adoption_decision", state=importer.name, exporter=exporter_name,
+                   skill=skill, family=fam, accepted=adopt, level=cfg.quarantine.value,
+                   poisoned=poisoned, first_hand=first_hand, content_hash=chash,
+                   regression_passed=0, regression_total=len(regression),
+                   probes_passed=0, probes_total=len(probes), budget_exhausted=True)
+        return
 
     if not report.accepted:  # roll back to the exact prior state
         importer.library.restore(skill, before)

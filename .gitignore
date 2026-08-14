@@ -4,5 +4,15 @@ __pycache__/
 .env
 *.egg-info/
 events.jsonl
-runs/
 .DS_Store
+
+# Run outputs stay untracked by default. The exceptions are the small result
+# summaries that back claims in the README, committed as evidence. Transcripts
+# and logs are never committed: they are large and regenerable.
+runs/*
+!runs/h1/
+runs/h1/*
+!runs/h1/*.json
+runs/h1/*transcripts*.json
+!runs/skill_lift.json
+!runs/skill_lift_live.json

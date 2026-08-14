@@ -88,6 +88,34 @@ def _modmath(prompt: str) -> str:
     return f"Fast exponentiation.\nANSWER: {pow(int(m.group(1)), int(m.group(2)), int(m.group(3)))}"
 
 
+_INSCRIPTION_RE = re.compile(r"Inscription: (.+)")
+_TERM_RE = re.compile(r"(\d+) ([a-z]+\d*)")
+
+
+def _lexicon(prompt: str) -> str:
+    """Value an inscription using the glyph table found IN THE PROMPT.
+
+    This is the one family where the scripted oracle and a live model consume
+    the same channel: the doctrine body is injected into the prompt, so the
+    oracle reads the table exactly as a model would. Two consequences worth
+    stating — the oracle cannot answer without the doctrine (as intended, this
+    is an information-carrying family), and a poisoned table poisons the oracle
+    through the artifact itself, with no poison registry in the loop."""
+    from ..bank.generators.lexicon import lexicon_truth_from_body
+    table = lexicon_truth_from_body(prompt)
+    if not table:
+        return "No lexicon available.\nANSWER: 0"
+    m = _INSCRIPTION_RE.search(prompt)
+    if not m:
+        return "No inscription.\nANSWER: 0"
+    total = 0
+    for count, glyph in _TERM_RE.findall(m.group(1)):
+        if glyph not in table:
+            return "Unknown glyph.\nANSWER: 0"
+        total += int(count) * table[glyph]
+    return f"Valued via the glyph table.\nANSWER: {total}"
+
+
 def make_oracle(registry: PoisonRegistry | Callable[[str, str], bool]) -> Callable[[str, str], str]:
     """Return a `policy(system, prompt) -> str` whose poison behaviour is driven
     by ground truth about what is actually INSTALLED.
@@ -119,8 +147,12 @@ def make_oracle(registry: PoisonRegistry | Callable[[str, str], bool]) -> Callab
         if doctrine not in prompt:
             return {"unit_chain": "Not sure.\nANSWER: 0",
                     "calendar_math": "Not sure.\nANSWER: 1900-01-01",
-                    "modmath": "Not sure.\nANSWER: 0"}.get(arch, "Not sure.\nANSWER: 0")
+                    "modmath": "Not sure.\nANSWER: 0",
+                    "lexicon": "No lexicon available.\nANSWER: 0"}.get(
+                        arch, "Not sure.\nANSWER: 0")
 
+        if arch == "lexicon":
+            return _lexicon(prompt)
         if arch == "unit_chain":
             return _unit_chain(prompt, lookup(name, family))
         if arch == "calendar_math":
