@@ -29,10 +29,17 @@ import random
 
 from .base import Generator, TaskInstance
 from .generators.calendar_math import CalendarMathGenerator
+from .generators.lexicon import LexiconGenerator, _GLYPHS
 from .generators.modmath import ModMathGenerator
 from .generators.unit_chain import UnitChainGenerator
 
 ARCHETYPES = ["unit_chain", "calendar_math", "modmath"]
+
+# `lexicon` is opt-in, NOT in ARCHETYPES. Adding a fourth archetype by default
+# would change the family count and break bit-for-bit reproduction of the
+# published v1 table for a purely cosmetic reason. Callers ask for it
+# explicitly: make_bank(k, include_lexicon=True).
+LEXICON = "lexicon"
 
 # disjoint invented-unit pools, one per unit_chain variant
 _SYLL_A = ["fl", "bl", "qu", "dr", "sn", "tv", "ml", "zr", "px", "gr", "vn", "hs"]
@@ -82,14 +89,30 @@ def family_name(archetype: str, variant: int) -> str:
     return archetype if variant == 0 else f"{archetype}{variant + 1}"
 
 
-def make_bank(n_variants: int = 1) -> dict:
+def _glyph_pool(variant: int) -> list[str]:
+    """Disjoint glyph vocabulary per lexicon variant, so each variant is a
+    genuinely separate body of knowledge rather than a relabelling."""
+    if variant == 0:
+        return list(_GLYPHS)
+    return [f"{g}{variant + 1}" for g in _GLYPHS]
+
+
+def make_bank(n_variants: int = 1, include_lexicon: bool = False) -> dict:
     """-> {family_name: Generator}, ordered archetype-major so round-robin
-    sharding spreads states across archetypes before it duplicates one."""
+    sharding spreads states across archetypes before it duplicates one.
+
+    `include_lexicon` adds the information-carrying archetype (see
+    generators/lexicon.py). Left off by default so the published v1 grid
+    reproduces bit-for-bit."""
+    archetypes = ARCHETYPES + ([LEXICON] if include_lexicon else [])
     bank: dict = {}
     for v in range(n_variants):
-        for arch in ARCHETYPES:
+        for arch in archetypes:
             fam = family_name(arch, v)
-            if arch == "unit_chain":
+            if arch == LEXICON:
+                gen = VariantGenerator(
+                    LexiconGenerator(lex_seed=v, pool=_glyph_pool(v)), fam)
+            elif arch == "unit_chain":
                 gen = VariantGenerator(UnitChainGenerator(pool=_unit_pool(v)), fam)
             elif arch == "modmath":
                 gen = VariantGenerator(

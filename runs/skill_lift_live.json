@@ -1,0 +1,30 @@
+[
+  {
+    "family": "unit_chain",
+    "no_skill": 1.0,
+    "with_skill": 1.0,
+    "lift": 0.0,
+    "verdict": "SATURATED"
+  },
+  {
+    "family": "calendar_math",
+    "no_skill": 1.0,
+    "with_skill": 1.0,
+    "lift": 0.0,
+    "verdict": "SATURATED"
+  },
+  {
+    "family": "modmath",
+    "no_skill": 0.833,
+    "with_skill": 0.667,
+    "lift": -0.167,
+    "verdict": "SATURATED"
+  },
+  {
+    "family": "lexicon",
+    "no_skill": 0.0,
+    "with_skill": 1.0,
+    "lift": 1.0,
+    "verdict": "LOAD-BEARING"
+  }
+]

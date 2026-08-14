@@ -1,0 +1,30 @@
+[
+  {
+    "family": "unit_chain",
+    "no_skill": 0.0,
+    "with_skill": 1.0,
+    "lift": 1.0,
+    "verdict": "LOAD-BEARING"
+  },
+  {
+    "family": "calendar_math",
+    "no_skill": 0.0,
+    "with_skill": 1.0,
+    "lift": 1.0,
+    "verdict": "LOAD-BEARING"
+  },
+  {
+    "family": "modmath",
+    "no_skill": 0.0,
+    "with_skill": 1.0,
+    "lift": 1.0,
+    "verdict": "LOAD-BEARING"
+  },
+  {
+    "family": "lexicon",
+    "no_skill": 0.0,
+    "with_skill": 1.0,
+    "lift": 1.0,
+    "verdict": "LOAD-BEARING"
+  }
+]
