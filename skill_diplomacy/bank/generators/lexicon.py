@@ -111,7 +111,12 @@ class LexiconGenerator(Generator):
 
 LEXICON_POISON_MARKER = "Erratum (supersedes the table above)"
 
-_ROW_RE = re.compile(r"^\| ([a-z]+) \| (\d+) \|$", re.MULTILINE)
+# Glyph names may carry a variant suffix (`azdek2`), so digits are part of the
+# token. Matching only [a-z] here silently produced an EMPTY table for every
+# variant family, which read as "the doctrine does not help" rather than as a
+# parse failure -- the most dangerous kind of bug this repository can have.
+_GLYPH = r"[a-z][a-z0-9]*"
+_ROW_RE = re.compile(rf"^\| ({_GLYPH}) \| (\d+) \|$", re.MULTILINE)
 
 
 def poison_lexicon_body(body: str, which: int = 0, delta: int = 7) -> str:
@@ -131,7 +136,7 @@ def lexicon_truth_from_body(body: str) -> dict[str, int]:
     """Read the table a state would actually act on, erratum included. Lets the
     scripted oracle behave exactly as a model reading this doctrine would."""
     table = {g: int(v) for g, v in _ROW_RE.findall(body or "")}
-    m = re.search(r"corrected to (\d+)\. Use \d+ for `([a-z]+)`", body or "")
+    m = re.search(rf"corrected to (\d+)\. Use \d+ for `({_GLYPH})`", body or "")
     if m:
         table[m.group(2)] = int(m.group(1))
     return table

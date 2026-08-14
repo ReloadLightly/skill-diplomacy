@@ -1,0 +1,175 @@
+{
+  "institution": "free_trade",
+  "quarantine": "none",
+  "export_policy": "open",
+  "n_states": 3,
+  "n_variants": 3,
+  "n_families": 3,
+  "endowment": "uniform",
+  "shard_sizes": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+  },
+  "seed": 1,
+  "states": {
+    "A": {
+      "final_capability": 1.0,
+      "capability_by_round": [
+        0.3333,
+        1.0
+      ],
+      "pass^k": 0.667,
+      "library": [
+        "lexicon-doctrine",
+        "lexicon2-doctrine",
+        "lexicon3-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 233214,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 2,
+      "rejected": 0
+    },
+    "B": {
+      "final_capability": 1.0,
+      "capability_by_round": [
+        0.3333,
+        1.0
+      ],
+      "pass^k": 0.667,
+      "library": [
+        "lexicon-doctrine",
+        "lexicon2-doctrine",
+        "lexicon3-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 217217,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 2,
+      "rejected": 0
+    },
+    "C": {
+      "final_capability": 1.0,
+      "capability_by_round": [
+        0.3333,
+        1.0
+      ],
+      "pass^k": 0.667,
+      "library": [
+        "lexicon-doctrine",
+        "lexicon2-doctrine",
+        "lexicon3-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 166709,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 2,
+      "rejected": 0
+    }
+  },
+  "mean_capability": 1.0,
+  "capability_gini": 0.0,
+  "governance_overhead": 0.0,
+  "import_screen_overhead": 0.0,
+  "self_screen_overhead": 0.0,
+  "unique_artifacts_screened": 6,
+  "tokens_per_screen": 0.0,
+  "poison_spread": {
+    "offered": 0,
+    "adopted": 0,
+    "first_hand_adopted": 0,
+    "transitive_adopted": 0,
+    "unique_offered": 0,
+    "adoption_rate": 0.0
+  },
+  "exports": {
+    "requests": 6,
+    "granted": 6,
+    "refused": 0,
+    "refusal_rate": 0.0,
+    "reasons": {}
+  },
+  "library_similarity": 1.0,
+  "distinct_bodies": 8,
+  "adoptions": [
+    {
+      "importer": "A",
+      "exporter": "B",
+      "skill": "lexicon2-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "ec62559634696be4"
+    },
+    {
+      "importer": "A",
+      "exporter": "C",
+      "skill": "lexicon3-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "0e5c153c4a98e4c8"
+    },
+    {
+      "importer": "B",
+      "exporter": "A",
+      "skill": "lexicon-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "5a1bb77aebad34bc"
+    },
+    {
+      "importer": "B",
+      "exporter": "A",
+      "skill": "lexicon3-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "0e5c153c4a98e4c8"
+    },
+    {
+      "importer": "C",
+      "exporter": "A",
+      "skill": "lexicon-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "5a1bb77aebad34bc"
+    },
+    {
+      "importer": "C",
+      "exporter": "A",
+      "skill": "lexicon2-doctrine",
+      "accepted": true,
+      "poisoned": false,
+      "first_hand": false,
+      "content_hash": "ec62559634696be4"
+    }
+  ]
+}

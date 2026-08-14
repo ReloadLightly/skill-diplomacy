@@ -1,0 +1,254 @@
+# Skill Lift: A Precondition for Studying Exchange in Populations of Language-Model Agents
+
+*Draft toward Artificial Life Letter format. ~2,100 words before references;
+the submission version still requires trimming to the journal limit.*
+
+---
+
+**Abstract.** Populations of language-model agents that exchange written skills
+are an attractive substrate for studying cultural transmission, and a growing
+number of studies vary the structure of exchange — who may copy from whom — and
+report effects on collective capability. We show that task design can silently
+obscure such effects, and we give the cheap measurement that detects it. In a
+population of three agents trading Agent-Skills artifacts, a deterministic model
+of the system predicted that open exchange would raise mean capability from 0.33
+to 1.00. Run against a
+live model, the same comparison yielded 0.89 versus 0.96 — a difference smaller
+than its own seed-to-seed variance. The cause was not the institutions but the
+tasks: agents that finished a run holding no skills at all still scored between
+0.89 and 1.00, because the base model solved the tasks unaided. We define
+**skill lift**, the difference between an agent's success rate holding a skill
+and holding an empty library, and measure it for each family: three of our four
+families had a lift of +0.00, +0.00 and −0.17. Replacing them with families
+whose answers require information carried only in the skill, with one reference
+skill endowed per agent, recovered the predicted effect — 0.333 versus 1.000,
+with zero variance across seeds. The null model's conditional prediction held
+once its premise did. We argue that skill lift should be reported before any
+claim about exchange structure.
+
+---
+
+## 1. The problem
+
+An exchange institution redistributes capability. It follows that an exchange
+institution can only be studied in a population where capability is unevenly
+held and where holding more of it changes what agents can do. This is obvious
+when stated. It is easy to violate without noticing.
+
+The violation has a specific shape. A researcher builds a population of
+language-model agents, gives each a library of written skills, varies who may
+copy from whom, and measures the population's success rate on a task suite. If
+the base model already solves those tasks, every arrangement produces the same
+score, and the reported "institutional effect" is a measurement of noise. The
+failure is silent: nothing errors, the numbers look reasonable, and the
+experiment appears to have run.
+
+We encountered this in our own system and report it here because the diagnostic
+is cheap, general, and — on the evidence of our own case — not obvious enough to
+be applied by default.
+
+## 2. The system
+
+We study a population of agents ("states") that improve in two ways: they author
+skills after failing a task, and they import skills authored by others. Skills
+are `SKILL.md` files in Anthropic's deployed Agent Skills format, carrying
+provenance, so the artifact that transfers is the artifact real systems use.
+
+Three variables are manipulated. The **exchange institution** determines who may
+copy from whom: autarky (nobody), free trade (everybody), clubs (disjoint
+subgroups), or adversarial trade (everybody, including a saboteur). The **export
+policy** determines who is willing to give. **Quarantine** determines what an
+importer tests before keeping what it received: nothing, a regression suite drawn
+from tasks it already solves, or fresh probes drawn from the region the incoming
+skill claims to cover. Screening consumes tokens from the same budget the agent
+would otherwise spend improving, which makes the cost of governance commensurable
+with the capability it protects — the arrangement studied in ecological immunology
+as a trade-off against growth (Sheldon & Verhulst, 1996), and anticipated in the
+cultural-evolution literature by Rogers' (1988) result that social learning earns
+no more at equilibrium than the costlier individual learning it free-rides upon.
+
+Tasks come from parameterized generators that compute their own ground truth, so
+verification is exact and held-out probes are unlimited and contamination-proof.
+Our three original families were unit-conversion chains over invented units,
+calendar arithmetic, and modular exponentiation.
+
+The system can be run in two modes. A deterministic **scripted** mode replaces
+the model with a rule that solves a family if and only if the corresponding skill
+is installed. A **live** mode runs a real model (Claude Haiku 4.5). We treated the
+scripted mode as a null model: it states what the institution does when agents are
+perfect, tireless solvers whose capability is exactly their library.
+
+## 3. What the two modes disagreed about
+
+In scripted mode, the institutional gradient is clean and large. With three
+agents and three families, autarky yields mean capability 0.33 — each agent
+masters only its own shard — and free trade yields 1.00.
+
+Run live, across three seeds per arm, the same comparison yielded autarky
+0.889 ± 0.111 and free trade 0.963 ± 0.064: a difference of +0.074 against a
+seed-to-seed standard deviation of 0.111. The effect the null model put at +0.67
+was, in the live system, smaller than its own noise.
+
+The diagnosis did not require statistics. In three of the six live runs, *every
+agent finished holding an empty library* — every self-authored skill had been
+rejected by its own quality gate — and the population still scored between 0.89
+and 1.00. Capability was almost entirely independent of the artifacts whose
+exchange the experiment was designed to study.
+
+The reason is visible once looked for. Each of our three families stated its own
+rules inside the task prompt: the conversion factors were given, the Gregorian
+calendar is known, modular arithmetic is known. A skill for such a family can
+carry only *strategy*, and strategy is what a competent model already has. The
+skill was decorative. The institution had nothing to move.
+
+We note that the live system is genuinely stochastic and that this was verified
+rather than assumed: eight repetitions of one identical prompt produced eight
+distinct reasoning texts and seven correct answers. The null effect is not an
+artifact of a frozen model.
+
+## 4. Skill lift
+
+We propose reporting, for every task family, the quantity
+
+> **skill lift** = P(solve | relevant skill installed) − P(solve | empty library)
+
+together with the floor P(solve | empty library). Three regimes matter. A high
+floor with near-zero lift means the family is **saturated**: the model solves it
+cold and the family cannot support an institutional experiment. A low floor with
+near-zero lift means the family is **inert**: the task is beyond the model, or the
+skill is bad. A low floor with large lift means the family is **load-bearing**:
+capability genuinely depends on holding the artifact.
+
+Measured live over six instances per family, our original bank was unambiguous:
+
+| family | floor | with skill | lift | verdict |
+|---|---|---|---|---|
+| unit_chain | 1.00 | 1.00 | +0.00 | saturated |
+| calendar_math | 1.00 | 1.00 | +0.00 | saturated |
+| modmath | 0.83 | 0.67 | −0.17 | saturated |
+| lexicon (new, §5) | 0.00 | 1.00 | +1.00 | load-bearing |
+
+Three of three original families were measuring nothing. The negative lift on
+modular exponentiation is worth its own remark: a generic strategy playbook made
+the model *worse*, presumably by displacing its own approach. Skills are not free
+even when they are ignored.
+
+Critically, the scripted null model scores all four families at +1.00, because it
+is constructed to fail without a skill. A system whose stand-in agent is defined
+as "capability = library" cannot detect that its tasks are saturated. This is the
+mechanism by which a plausible instrument came to overstate its own institutional
+effect ninefold.
+
+## 5. The repair, and the confirmation
+
+For a skill to be load-bearing it must carry *information the task does not
+supply*. This is also what deployed skills do: a `SKILL.md` is valuable because it
+holds an API's quirks, a schema, a house style — knowledge, not cleverness.
+
+We therefore added a family type in which each family owns a private lexicon
+mapping invented glyphs to integer values. Tasks quote an inscription ("3 azdek,
+7 korvax, 2 lumeth"); the answer is its total value; the mapping appears only in
+the family's reference skill. Without that skill the task is unanswerable except
+by chance; with it, the arithmetic is trivial. Measured live, the family's floor
+is 0.00 and its lift is +1.00.
+
+We then repeated the same autarky-versus-free-trade contrast in the same harness,
+with the same model and seeds, over three lexicon variants. Each state began with
+the reference skill for its home family: this isolates the transmission question
+from the separate discovery question of how the first copy arises. The result was:
+
+| institution | mean capability | s.d. over 3 seeds |
+|---|---|---|
+| autarky | 0.333 | 0.000 |
+| free trade | 1.000 | 0.000 |
+
+The gap is +0.667 with no variance whatsoever, against +0.074 for the same
+comparison over saturated families. The scripted null model had predicted +0.67.
+
+This is the paper's central point. The null model's prediction was right in the
+regime where its defining assumption — capability tracks the library — actually
+held. The original tasks violated that premise, and nothing in the experiment's
+output distinguished the two situations. Skill lift does, at the cost of one
+cheap run per family.
+
+## 6. Discussion
+
+We take three things from this.
+
+First, a methodological claim with a number attached: an exchange-structure
+experiment over saturated tasks understated its effect by a factor of nine, and
+the understatement was invisible in every metric the experiment reported. Studies
+that vary communication topology or exchange structure across populations of
+language-model agents — a growing genre, e.g. Nisioti et al. (2024) on collective
+innovation under varying connectivity — should report the floor and the lift of
+their task suite, or the reader cannot tell whether a null result concerns the
+structure or the tasks.
+
+Second, an observation about null models. Ours was not a weak baseline; it was a
+carefully built deterministic twin, and it was internally consistent, reproducible
+and wrong in a way it could not detect. A null model that defines capability as a
+function of the library will confirm that capability is a function of the library.
+The check has to come from outside the model, which is what the empty-library
+control provides.
+
+Third, a point of contact with older results — and one measurement it produced.
+That in-distribution screening is blind to off-distribution defects, which our
+quarantine tiers exhibit, is not new: D'haeseleer, Forrest and Helman (1996)
+proved that detector sets derived from "self" have geometric holes that no finite
+such set can cover. Working over load-bearing families let us put numbers on that
+in our own scripted setting, against a defect corrupting a single row of an
+eight-row reference table. Across five deterministic seeds, home-shard regression
+screening admitted 100% of poisoned artifacts while consuming 23% of the budget —
+expensive and perfectly blind. A six-probe held-out suite admitted 80% when the
+suite was drawn once per round and reused, and 29% when re-drawn per screening
+event, at 58% and 67% overhead respectively. Two things follow. Whether a screen
+is *held out* matters less than whether it is *re-drawn*: a fixed held-out suite
+has one hole, and every importer falls into it at once. And even fresh screening
+admits nearly a third of a defect
+confined to a small region of the space, because coverage, not distribution, is
+the binding constraint. That dense exchange
+collapses diversity is likewise familiar from island-model evolutionary algorithms
+(Cantú-Paz, 2000). We think the substrate is new and the accounting — screening
+priced in the same currency as improvement — is new, but we want to be explicit
+that the population dynamics of artifact exchange were substantially mapped by
+artificial life before language models existed. Ray's (1991) Tierra already
+produced parasites, evolved immunity, and hyper-parasites; Zaman et al. (2014)
+showed in Avida that parasites are *generative*, raising host complexity — a
+result our purely destructive saboteur does not reproduce and should be measured
+against.
+
+Everything reported here is reproducible from a public repository with no API key
+for the scripted results and one command for the live ones.
+
+## Limitations
+
+Three seeds per live arm; one model tier; one family type in the load-bearing
+condition. The reference skills in the load-bearing condition are endowed rather
+than discovered, which separates the transmission question we study from the
+discovery question we do not. The probe-coverage comparison is scripted rather
+than live and uses five seeds and one targeted contaminant class. Skill lift is
+defined against a specific skill; a family judged inert under a poor skill may be
+load-bearing under a better one, so the measurement bounds the pair, not the task
+alone.
+
+## References
+
+Cantú-Paz, E. (2000). *Efficient and Accurate Parallel Genetic Algorithms.* Kluwer.
+
+D'haeseleer, P., Forrest, S., & Helman, P. (1996). An immunological approach to
+change detection. *Proc. IEEE Symposium on Security and Privacy.*
+
+Nisioti, E., Risi, S., Momennejad, I., Oudeyer, P.-Y., & Moulin-Frier, C. (2024).
+Collective innovation in groups of large language models. *ALIFE 2024.*
+
+Ray, T. S. (1991). An approach to the synthesis of life. *Artificial Life II.*
+
+Rogers, A. R. (1988). Does biology constrain culture? *American Anthropologist,*
+90(4), 819–831.
+
+Sheldon, B. C., & Verhulst, S. (1996). Ecological immunology: costly parasite
+defences and trade-offs in evolutionary ecology. *TREE,* 11(8), 317–321.
+
+Zaman, L., Meyer, J. R., Devangam, S., Bryson, D. M., Lenski, R. E., & Ofria, C.
+(2014). Coevolution drives the emergence of complex traits and promotes
+evolvability. *PLOS Biology,* 12(12), e1002023.

@@ -79,7 +79,8 @@ stochastic.
 |---|---|---|
 | **The institution barely moves anything** | **live** | **The headline negative result.** The harness predicts free trade beats autarky by +0.67 capability (0.33 → 1.00). Live, across three seeds each, the gap is **+0.07 — smaller than the seed-to-seed standard deviation (0.11)**. The harness overstates the institutional effect roughly ninefold. The diagnosis is stark: in several live runs every agent finished with an *empty skill library* and still scored 0.89–1.00, because the base model already solves these tasks unaided. An institution can only redistribute capability the agents do not already have. |
 | **Three of three original task families were measuring nothing** | **live** | Skill lift — the gain from holding a family's doctrine versus an empty library — is **+0.00 for `unit_chain`, +0.00 for `calendar_math`, and −0.17 for `modmath`** (the generic playbook actively *hurts*). The scripted harness scores all three at +1.00 by construction, because it is built to fail without a doctrine. The information-carrying `lexicon` family added in response scores **+1.00 live, from a floor of 0.00**. Run `python calibrate.py --live --lexicon` to reproduce. |
-| Screening blindness | harness + live | A regression suite drawn from what you already do well accepts every defective skill offered (6/6). Fresh off-distribution probes catch every one, at ~4× the token cost. Reproduced on a live model, where probes rejected an overfitted self-authored skill that regression testing passed. |
+| **The harness's conditional prediction was right; the original tasks violated its premise** | **live** | Re-running the same autarky-versus-free-trade contrast, model, harness and seeds over *load-bearing* families recovers the predicted effect: **autarky 0.333 ± 0.000, free trade 1.000 ± 0.000, a gap of +0.667 with zero variance across three seeds each** — against +0.07 over saturated families. Each state is endowed with one private reference skill, isolating transmission from discovery. The institutional treatment is unchanged; the task and initial knowledge endowment now satisfy the premise that capability tracks the library. |
+| Screening blindness | harness + live | In the new scripted load-bearing test, home-shard regression admits **100%** of poisoned artifacts while consuming 23% of the budget. Six held-out probes still admit **80%** when one fixed suite is reused, but only **29%** when probes are re-drawn per screening event, at 58% and 67% overhead respectively. An earlier live smoke run likewise showed probes rejecting an overfit skill that regression accepted; the full screening comparison has not yet been replicated live. |
 | Scarcity precondition | harness | Institutions have no measurable effect unless skills are scarce relative to the task space. With three task families every arrangement returns identical capability. This is a methodological warning about a whole class of multi-agent evaluations. |
 | Inequality is non-monotone | harness | As export restriction tightens, mean capability falls monotonically, but *inequality* peaks at moderate restriction (Gini ≈ 0.68) and falls again under strict autarky — strict refusal produces not a hierarchy but a flat, uniformly poor population. Robust across five endowment shapes; vanishes only under exact symmetry. |
 | Austerity admits contagion | harness | Under a binding budget, agents that cannot afford to screen and adopt anyway take on 228 defective skills, 198 of them acquired second-hand through honest intermediaries. When budgets are generous the same policy never triggers. Screening is a luxury good. |
@@ -87,22 +88,21 @@ stochastic.
 
 ## What is not yet true
 
-**The institutional results above are not yet supported on live models.** The
-negative result in the first row is the honest headline: with these task families
-and this model, the exchange institution is measuring a variable that barely moves
-the outcome. Until the tasks are hard enough that an agent without the relevant
-skill reliably fails, every institutional comparison here is a comparison between
-two ways of arriving at the same saturated score. Calibrating task difficulty
-against an empty-library control is therefore the precondition for all of it, not
-an improvement to it.
+**Only the autarky-versus-free-trade contrast has been recovered on a live model
+over a load-bearing family.** That result uses one model, one information-carrying
+archetype, three states and three seeds, with one reference skill endowed per
+state. Clubs, adversarial trade, quarantine, inequality and monoculture have not
+yet received equivalent live replication. Calibrating each family against an
+empty-library control remains a precondition for interpreting any such comparison.
 
 The scripted stand-in cannot speak to monoculture at all: it emits one playbook
 text for every skill, so library similarity is 1.0 by construction. That question
 needs live runs, which have only just begun.
 
-The task families are variants of three archetypes, which creates skill *scarcity*
-but not task *diversity* — a live model may transfer across variants far more
-easily than across archetypes. Genuinely distinct archetypes are the next addition.
+The new lexicon variants create genuine information scarcity but still constitute
+only one archetype. Genuinely distinct load-bearing archetypes are the next
+addition; otherwise the live result establishes one mechanism rather than a broad
+task-space claim.
 
 The saboteur is scripted rather than adaptive. In evolutionary computation an
 adversary that does not itself evolve is a static red-team probe, not coevolution,
@@ -118,9 +118,11 @@ are new and which are re-derivations in a new substrate.
 ## Running it
 
 ```bash
-pytest -q                                # 70 tests, ~4s, no API key needed
+pytest -q                                # 72 tests, no API key needed
 python calibrate.py --lexicon            # skill lift per family (start here)
 python calibrate.py --live --lexicon     # ...against a real model: 1/4 families survive
+python run_lex.py free_trade 0           # live institution run over load-bearing families
+python run_probes.py                     # fixed vs fresh probe coverage (scripted)
 python run_v1.py                         # the institution × quarantine grid (deterministic)
 python run_v2.py --sweep k               # the export-restriction dial → capability and inequality
 python run_v2.py --sweep budget          # governance under a budget that actually binds

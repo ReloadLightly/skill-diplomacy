@@ -121,6 +121,30 @@ def test_variants_get_disjoint_glyph_vocabularies():
     assert not (a & b), "variants must be separate bodies of knowledge"
 
 
+def test_every_variant_family_is_solvable_with_its_own_reference():
+    """Regression. Variant glyphs carry a numeric suffix (`azdek2`), and the
+    table parser originally accepted only [a-z]. Every variant family therefore
+    parsed to an EMPTY table and failed silently -- which the harness reported
+    as 'the doctrine does not help', indistinguishable from a real null result.
+    A bug that masquerades as a finding is the one this repository must never
+    ship, so each variant is checked against its own reference here."""
+    oracle = make_oracle({})
+    bank = make_bank(4, include_lexicon=True)
+    lex = {f: g for f, g in bank.items() if f.startswith("lexicon")}
+    assert len(lex) == 4
+    for family, gen in lex.items():
+        inner = gen.inner
+        tasks = gen.batch(seed=5, n=4)
+        solved = sum(verify(t, oracle(SYSTEM, _prompt(gen, t, inner.reference_body())))
+                     for t in tasks)
+        assert solved == len(tasks), f"{family} unsolvable WITH its own reference"
+
+
+def test_bank_can_be_restricted_to_load_bearing_families():
+    bank = make_bank(3, archetypes=["lexicon"])
+    assert list(bank) == ["lexicon", "lexicon2", "lexicon3"]
+
+
 # -- the calibration verdicts ----------------------------------------------
 
 @pytest.mark.parametrize("floor,lift,expected", [
