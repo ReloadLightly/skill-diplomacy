@@ -97,14 +97,23 @@ def _glyph_pool(variant: int) -> list[str]:
     return [f"{g}{variant + 1}" for g in _GLYPHS]
 
 
-def make_bank(n_variants: int = 1, include_lexicon: bool = False) -> dict:
+def make_bank(n_variants: int = 1, include_lexicon: bool = False,
+              archetypes: list[str] | tuple[str, ...] | None = None) -> dict:
     """-> {family_name: Generator}, ordered archetype-major so round-robin
     sharding spreads states across archetypes before it duplicates one.
 
     `include_lexicon` adds the information-carrying archetype (see
     generators/lexicon.py). Left off by default so the published v1 grid
-    reproduces bit-for-bit."""
-    archetypes = ARCHETYPES + ([LEXICON] if include_lexicon else [])
+    reproduces bit-for-bit.
+
+    `archetypes` overrides the set entirely. The use that matters is
+    `archetypes=["lexicon"]`, which builds a bank of nothing but load-bearing
+    families — the only configuration in which an institutional comparison is
+    measuring anything (see calibrate.py and runs/skill_lift_live.json)."""
+    if archetypes is not None:
+        archetypes = list(archetypes)
+    else:
+        archetypes = ARCHETYPES + ([LEXICON] if include_lexicon else [])
     bank: dict = {}
     for v in range(n_variants):
         for arch in archetypes:

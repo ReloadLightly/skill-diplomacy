@@ -1,0 +1,62 @@
+[
+  {
+    "quarantine": "none",
+    "probes": "fixed",
+    "adopted": 125,
+    "offered": 125,
+    "admitted_rate": 1.0,
+    "governance_overhead": 0.0,
+    "mean_capability": 0.6306,
+    "seeds": 5
+  },
+  {
+    "quarantine": "regression",
+    "probes": "fixed",
+    "adopted": 125,
+    "offered": 125,
+    "admitted_rate": 1.0,
+    "governance_overhead": 0.2264,
+    "mean_capability": 0.6306,
+    "seeds": 5
+  },
+  {
+    "quarantine": "regression_plus_probes",
+    "probes": "fixed",
+    "adopted": 100,
+    "offered": 125,
+    "admitted_rate": 0.8,
+    "governance_overhead": 0.58,
+    "mean_capability": 0.6972,
+    "seeds": 5
+  },
+  {
+    "quarantine": "none",
+    "probes": "fresh",
+    "adopted": 125,
+    "offered": 125,
+    "admitted_rate": 1.0,
+    "governance_overhead": 0.0,
+    "mean_capability": 0.6306,
+    "seeds": 5
+  },
+  {
+    "quarantine": "regression",
+    "probes": "fresh",
+    "adopted": 125,
+    "offered": 125,
+    "admitted_rate": 1.0,
+    "governance_overhead": 0.2264,
+    "mean_capability": 0.6306,
+    "seeds": 5
+  },
+  {
+    "quarantine": "regression_plus_probes",
+    "probes": "fresh",
+    "adopted": 41,
+    "offered": 142,
+    "admitted_rate": 0.2887,
+    "governance_overhead": 0.6658,
+    "mean_capability": 0.7833,
+    "seeds": 5
+  }
+]

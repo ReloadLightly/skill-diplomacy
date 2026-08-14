@@ -60,7 +60,7 @@ class AdversarialTrade(FreeTrade):
     name: str = "adversarial_trade"
     poisoner: str = ""
     poisoners: list[str] = field(default_factory=list)
-    poison_families: tuple = ("unit_chain",)
+    poison_families: tuple = ("unit_chain", "lexicon")
     poison_rate: float = 0.5
 
     def is_poisoner(self, state: str) -> bool:
@@ -96,8 +96,16 @@ POISON_TEXT = (
 
 
 def is_poisoned_body(body: str) -> bool:
-    """Content-derived ground truth. Survives export → import → re-export."""
-    return POISON_MARKER in (body or "")
+    """Content-derived ground truth. Survives export → import → re-export.
+
+    Two contaminant classes are recognised, one per archetype family: a bogus
+    shortcut RULE appended to a procedural playbook (unit_chain), and an
+    ERRATUM silently overriding one row of a reference table (lexicon). Both
+    share the defining property — locally plausible, correct on shallow cases,
+    wrong off-shard — which is what makes home-shard screening blind to them."""
+    from ..bank.generators.lexicon import LEXICON_POISON_MARKER
+    text = body or ""
+    return POISON_MARKER in text or LEXICON_POISON_MARKER in text
 
 
 def is_poisoned_artifact(artifact: dict) -> bool:
@@ -105,12 +113,21 @@ def is_poisoned_artifact(artifact: dict) -> bool:
 
 
 def poison_artifact(artifact: dict) -> dict:
-    """Append a subtly wrong rule to the playbook body — advice that matches the
-    exporter's home shard but corrupts off-shard reasoning. Idempotent: poisoning
-    an already-poisoned artifact is a no-op, so re-exports do not stack markers."""
+    """Corrupt an artifact in the way its own kind is plausibly corrupted.
+
+    A procedural playbook gets a bogus shortcut rule; a reference table gets an
+    erratum silently overriding one row. Dispatch is on CONTENT, not on family
+    name, so an artifact is poisoned correctly however it was labelled and
+    wherever it is intercepted. Idempotent: re-exports do not stack markers."""
     if is_poisoned_artifact(artifact):
         return dict(artifact)
+    from ..bank.generators.lexicon import poison_lexicon_body
+
+    body = artifact["body"]
     poisoned = dict(artifact)
-    poisoned["body"] = artifact["body"].rstrip() + POISON_TEXT
+    if "| glyph | value |" in body:
+        poisoned["body"] = poison_lexicon_body(body)
+    else:
+        poisoned["body"] = body.rstrip() + POISON_TEXT
     poisoned["_poisoned"] = True  # convenience flag; the BODY is the ground truth
     return poisoned

@@ -14,5 +14,10 @@ runs/*
 runs/h1/*
 !runs/h1/*.json
 runs/h1/*transcripts*.json
+!runs/lex/
+runs/lex/*
+!runs/lex/*.json
+runs/lex/*transcripts*.json
 !runs/skill_lift.json
 !runs/skill_lift_live.json
+!runs/probe_coverage.json

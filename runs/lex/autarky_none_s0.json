@@ -1,0 +1,114 @@
+{
+  "institution": "autarky",
+  "quarantine": "none",
+  "export_policy": "open",
+  "n_states": 3,
+  "n_variants": 3,
+  "n_families": 3,
+  "endowment": "uniform",
+  "shard_sizes": {
+    "A": 1,
+    "B": 1,
+    "C": 1
+  },
+  "seed": 0,
+  "states": {
+    "A": {
+      "final_capability": 0.3333,
+      "capability_by_round": [
+        0.3333,
+        0.3333
+      ],
+      "pass^k": 0.333,
+      "library": [
+        "lexicon-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 383353,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 0,
+      "rejected": 0
+    },
+    "B": {
+      "final_capability": 0.3333,
+      "capability_by_round": [
+        0.3333,
+        0.3333
+      ],
+      "pass^k": 0.333,
+      "library": [
+        "lexicon2-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 547726,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 0,
+      "rejected": 0
+    },
+    "C": {
+      "final_capability": 0.3333,
+      "capability_by_round": [
+        0.3333,
+        0.3333
+      ],
+      "pass^k": 0.333,
+      "library": [
+        "lexicon3-doctrine"
+      ],
+      "budget": {
+        "spent_tokens": 309662,
+        "rollouts": 6,
+        "quarantine_tokens": 0,
+        "quarantine_rollouts": 0,
+        "import_screen_tokens": 0,
+        "self_screen_tokens": 0,
+        "governance_overhead": 0.0,
+        "import_screen_overhead": 0.0,
+        "self_screen_overhead": 0.0
+      },
+      "screened": 0,
+      "rejected": 0
+    }
+  },
+  "mean_capability": 0.3333,
+  "capability_gini": 0.0,
+  "governance_overhead": 0.0,
+  "import_screen_overhead": 0.0,
+  "self_screen_overhead": 0.0,
+  "unique_artifacts_screened": 0,
+  "tokens_per_screen": 0.0,
+  "poison_spread": {
+    "offered": 0,
+    "adopted": 0,
+    "first_hand_adopted": 0,
+    "transitive_adopted": 0,
+    "unique_offered": 0,
+    "adoption_rate": 0.0
+  },
+  "exports": {
+    "requests": 0,
+    "granted": 0,
+    "refused": 0,
+    "refusal_rate": 0.0,
+    "reasons": {}
+  },
+  "library_similarity": 0.3913,
+  "distinct_bodies": 3,
+  "adoptions": []
+}

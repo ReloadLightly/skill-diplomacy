@@ -85,6 +85,22 @@ class TrialConfig:
     # -- task bank (sprint 2) ----------------------------------------------
     n_variants: int = 1          # variants per archetype → 3*n_variants families.
                                  # 1 reproduces v1 exactly; >1 creates scarcity.
+    # -- task bank (sprint 3) ----------------------------------------------
+    archetypes: tuple | None = None   # None → the v1 three. ("lexicon",) selects
+                                      # only load-bearing families, which is the
+                                      # only setting where an institutional
+                                      # comparison measures anything at all.
+    seed_references: bool = False     # give each state the reference doctrine for
+                                      # its HOME families at t=0. Required for
+                                      # information-carrying archetypes: a model
+                                      # cannot invent a private glyph table by
+                                      # introspection, so without this a
+                                      # specialist never holds anything worth
+                                      # exporting. It separates the DISCOVERY
+                                      # question (how does the first copy arise?)
+                                      # from the TRANSMISSION question (what
+                                      # happens once it exists), and this
+                                      # repository is about the second.
     # -- endowment (sprint 2) ----------------------------------------------
     endowment: str = "uniform"   # uniform | step | zipf
     n_great_powers: int = 0      # `step` only: how many states are great powers
@@ -96,6 +112,9 @@ class TrialConfig:
     n_defectors: int = 0                 # last n states export nothing
     # -- governance ---------------------------------------------------------
     gate_self_edits: bool = False        # v1 behaviour is False; run_v2 sets True
+    fresh_probes: bool = False           # re-draw the probe suite per screening
+                                         # event rather than once per round. See
+                                         # _consider_adoption. False reproduces v1.
     screen_bankruptcy: str = "refuse"    # refuse | adopt_unscreened — what a
                                          # state does when it CANNOT AFFORD to
                                          # screen an import. E4's core modelled
@@ -191,10 +210,32 @@ def _shards(cfg: TrialConfig, names: list[str], families: list[str]) -> dict:
 
 
 def _bank(cfg: TrialConfig) -> tuple[dict, list[str]]:
-    """Per-config task bank. At n_variants=1 this is byte-identical in behaviour
-    to the module-level GENS/FAMILIES, so the published v1 table reproduces."""
-    gens = make_bank(cfg.n_variants)
+    """Per-config task bank. At n_variants=1 with default archetypes this is
+    byte-identical in behaviour to the module-level GENS/FAMILIES, so the
+    published v1 table reproduces."""
+    gens = make_bank(cfg.n_variants, archetypes=cfg.archetypes)
     return gens, list(gens.keys())
+
+
+def _seed_references(cfg: TrialConfig, states: dict, gens: dict) -> None:
+    """Install each state's home-family reference doctrines at t=0.
+
+    Only generators that carry information expose `reference_body()`; for the
+    rest this is a no-op, so switching the flag on cannot disturb the v1 grid."""
+    if not cfg.seed_references:
+        return
+    for name, st in states.items():
+        for fam in st.home_families:
+            inner = getattr(gens[fam], "inner", gens[fam])
+            body = getattr(inner, "reference_body", None)
+            if body is None:
+                continue
+            skill = f"{fam.replace('_', '-')}-doctrine"
+            st.library.add_skill(skill, f"Doctrine for {fam} tasks "
+                                        f"(home shard of {name}).", body())
+            st.log.append("skill_commit", state=name, skill=skill, family=fam,
+                          source="endowment",
+                          content_hash=st.library.content_hash(skill))
 
 
 def _eval_seed(cfg: TrialConfig, rnd: int, name: str, fam: str,
@@ -203,6 +244,12 @@ def _eval_seed(cfg: TrialConfig, rnd: int, name: str, fam: str,
     # would make trials irreproducible across runs.
     return (cfg.seed * 1_000_003 + rnd * 9973 + names.index(name) * 31
             + families.index(fam) * 7)
+
+
+def _stable_hash(text: str) -> str:
+    """sha256 hex — NOT Python's hash(), which is salted per process and would
+    make probe draws irreproducible across runs."""
+    return hashlib.sha256(text.encode()).hexdigest()[:8]
 
 
 def _artifact_hash(artifact: dict) -> str:
@@ -271,6 +318,7 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                              keep_transcripts=cfg.dump_transcripts)
         for n in names
     })
+    _seed_references(cfg, states, gens)
     capability_by_round: dict = {n: [] for n in names}
     self_gate = cfg.quarantine if cfg.gate_self_edits else QuarantineLevel.NONE
 
@@ -328,7 +376,7 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                                        exporter=states[exporter_name],
                                        skill=skill, rnd=rnd)
 
-    return _summarise(cfg, log, states, capability_by_round, names)
+    return _summarise(cfg, log, states, capability_by_round, names, gens)
 
 
 def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
@@ -362,7 +410,19 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
     importer.screened_hashes.add(chash)
 
     regression = importer.regression_store[:5]
-    probes = gens[fam].batch(seed=cfg.seed * 131 + rnd * 17 + 3, n=cfg.n_probes)
+    # Probe freshness. Keyed only on (trial seed, round), ONE probe suite screens
+    # every adoption in a round -- so a defect the suite happens to miss is
+    # missed by every importer simultaneously, and once adopted it is never
+    # re-examined. That is a coverage hole of exactly the kind D'haeseleer,
+    # Forrest & Helman (1996) proved is unavoidable for finite self-derived
+    # detector sets, and here it is severe enough to hide a targeted defect
+    # completely. `fresh_probes` re-draws per screening event, which is what
+    # "fresh held-out probes" was always supposed to mean. Default False keeps
+    # the published v1 numbers; the comparison between the two is a result.
+    pseed = cfg.seed * 131 + rnd * 17 + 3
+    if cfg.fresh_probes:
+        pseed += int(_stable_hash(f"{importer.name}|{exporter_name}|{skill}"), 16) % 100_000
+    probes = gens[fam].batch(seed=pseed, n=cfg.n_probes)
     try:
         report = run_quarantine(
             cfg.quarantine, regression, probes,
@@ -400,7 +460,7 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
                probes_passed=report.probes_passed, probes_total=report.probes_total)
 
 
-def _summarise(cfg, log, states, capability_by_round, names) -> dict:
+def _summarise(cfg, log, states, capability_by_round, names, gens) -> dict:
     events = log.read()
     per_state = {}
     for n, st in states.items():
@@ -429,7 +489,10 @@ def _summarise(cfg, log, states, capability_by_round, names) -> dict:
         "export_policy": cfg.export_policy,
         "n_states": len(names),
         "n_variants": cfg.n_variants,
-        "n_families": 3 * cfg.n_variants,
+        # count the bank, do not assume three archetypes: cfg.archetypes can
+        # select a single one, and a wrong denominator here misreports every
+        # capability figure that is read against it.
+        "n_families": len(gens),
         "endowment": cfg.endowment if not cfg.n_great_powers else "step",
         "shard_sizes": {n: len(states[n].home_families) for n in names},
         "seed": cfg.seed,
