@@ -27,6 +27,7 @@ runs/lex/*transcripts*.json
 !runs/v2_k.json
 !runs/v2_budget.json
 !runs/ratchet.json
+!runs/sufficiency.json
 !runs/LICENSE-DATA
 
 # The event logs behind the headline deterministic claims ARE committed. The

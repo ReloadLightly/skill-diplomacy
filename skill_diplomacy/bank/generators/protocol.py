@@ -199,11 +199,10 @@ def protocol_spec_from_body(body: str) -> dict | None:
         rf"{re.escape(PROTOCOL_POISON_MARKER)}.*?to \[([\d,\s]+)\]", body, re.S)
     if corrected:
         weights = [int(x) for x in corrected.group(1).split(",") if x.strip()]
-    sub_fix = re.search(
-        rf"{re.escape(SUBSTITUTION_POISON_MARKER)}.*?corrected to (\d)\. "
-        rf"Use \d for `([A-Z])`", body, re.S)
-    if sub_fix:
-        subs[sub_fix.group(2)] = int(sub_fix.group(1))
+    if SUBSTITUTION_POISON_MARKER in body:
+        tail = body.split(SUBSTITUTION_POISON_MARKER, 1)[1]
+        for letter, val in re.findall(r"`([A-Z])` to (\d)", tail):
+            subs[letter] = int(val)
     return {"substitution": subs, "weights": weights,
             "check_alphabet": a.group(1), "modulus": int(m.group(1)),
             "fold": _FOLD_ON in body}
@@ -232,7 +231,8 @@ def apply_protocol(spec: dict, record: str) -> str:
 
 
 def poison_protocol_body(body: str, mode: str = "substitution",
-                         position: int = -1, delta: int = 1) -> str:
+                         position: int = -1, delta: int = 1,
+                         n_entries: int = 1) -> str:
     """Corrupt a doctrine, at a chosen level of DETECTABILITY.
 
     The two modes are not variations on a theme; they sit an order of magnitude
@@ -251,9 +251,15 @@ def poison_protocol_body(body: str, mode: str = "substitution",
     whether a screen is *re-drawn* rather than merely *held out* decides
     whether the population catches it at all.
 
-    Sweeping between them measures the thing the paper claims to price: the
-    screening budget needed to catch a defect as a function of how rare its
-    symptoms are."""
+    `n_entries` makes that sweep continuous rather than a two-point contrast.
+    Corrupting k entries of the substitution table gives a detectability that
+    rises smoothly with k — measured at record_len=4: k=1 gives d=0.17, k=2
+    0.29, k=3 0.41, k=5 0.58, k=8 0.76, k=12 0.91, k=24 0.99. Record LENGTH is
+    not a usable dial for this, incidentally, and it is worth saying why: a
+    record carries four letters however long its numeric block is, so d stays
+    near 0.15 from record_len 2 to 16. Length dials execution difficulty; entry
+    count dials detectability. They are separate axes and the experiment needs
+    both."""
     body = body or ""
     if mode == "weight":
         m = _WEIGHTS_RE.search(body)
@@ -273,12 +279,17 @@ def poison_protocol_body(body: str, mode: str = "substitution",
         pairs = _SUB_RE.findall(body)
         if not pairs:
             return body
-        letter, value = pairs[position % len(pairs)]
-        wrong = (int(value) + delta) % 10
+        k = max(1, min(n_entries, len(pairs)))
+        fixes = []
+        for i in range(k):
+            letter, value = pairs[(position + i) % len(pairs)]
+            fixes.append((letter, (int(value) + delta) % 10))
+        listing = ", ".join(f"`{c}` to {v}" for c, v in fixes)
         return body.rstrip() + (
-            f"\n\n{SUBSTITUTION_POISON_MARKER}: the entry for `{letter}` was "
-            f"mis-transcribed and is corrected to {wrong}. Use {wrong} for "
-            f"`{letter}`."
+            f"\n\n{SUBSTITUTION_POISON_MARKER}: {k} entr"
+            f"{'y was' if k == 1 else 'ies were'} mis-transcribed during "
+            f"transcription and {'is' if k == 1 else 'are'} corrected — "
+            f"{listing}. Use these values."
         )
 
     raise ValueError(f"unknown poison mode {mode!r}; expected 'weight' or "
@@ -286,7 +297,7 @@ def poison_protocol_body(body: str, mode: str = "substitution",
 
 
 def poison_detectability(gen: "ProtocolGenerator", mode: str, n: int = 500,
-                         seed: int = 0) -> float:
+                         seed: int = 0, n_entries: int = 1) -> float:
     """Share of instances on which a poisoned doctrine gives the wrong answer.
 
     This is the ground truth a screen is trying to detect, and it is worth being
@@ -295,7 +306,8 @@ def poison_detectability(gen: "ProtocolGenerator", mode: str, n: int = 500,
     much screening is enough."""
     import random as _random
     clean = protocol_spec_from_body(gen.reference_body())
-    bad = protocol_spec_from_body(poison_protocol_body(gen.reference_body(), mode))
+    bad = protocol_spec_from_body(
+        poison_protocol_body(gen.reference_body(), mode, n_entries=n_entries))
     if clean is None or bad is None:
         return 0.0
     rng = _random.Random(seed)

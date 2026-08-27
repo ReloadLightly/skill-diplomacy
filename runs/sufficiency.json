@@ -1,0 +1,1688 @@
+{
+  "detectability": {
+    "1": 0.1783,
+    "2": 0.3133,
+    "3": 0.43,
+    "5": 0.6133,
+    "8": 0.7967,
+    "12": 0.925,
+    "24": 0.9867
+  },
+  "rows": [
+    {
+      "entries": 1,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 52,
+      "offered": 60,
+      "admitted_rate": 0.8667,
+      "admitted_ci": [
+        0.8167,
+        0.9167
+      ],
+      "admitted_by_seed": [
+        0.8667,
+        0.8,
+        0.9333,
+        0.8667
+      ],
+      "governance_overhead": 0.323,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.8217
+    },
+    {
+      "entries": 1,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 46,
+      "offered": 60,
+      "admitted_rate": 0.7667,
+      "admitted_ci": [
+        0.7333,
+        0.8
+      ],
+      "admitted_by_seed": [
+        0.7333,
+        0.8,
+        0.8,
+        0.7333
+      ],
+      "governance_overhead": 0.4081,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.6752
+    },
+    {
+      "entries": 1,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 51,
+      "offered": 60,
+      "admitted_rate": 0.85,
+      "admitted_ci": [
+        0.7667,
+        0.9167
+      ],
+      "admitted_by_seed": [
+        0.8667,
+        0.9333,
+        0.8667,
+        0.7333
+      ],
+      "governance_overhead": 0.4953,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.4559
+    },
+    {
+      "entries": 1,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 59,
+      "offered": 60,
+      "admitted_rate": 0.9833,
+      "admitted_ci": [
+        0.95,
+        1.0
+      ],
+      "admitted_by_seed": [
+        1.0,
+        1.0,
+        0.9333,
+        1.0
+      ],
+      "governance_overhead": 0.6004,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.2078
+    },
+    {
+      "entries": 1,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 60,
+      "offered": 60,
+      "admitted_rate": 1.0,
+      "admitted_ci": [
+        1.0,
+        1.0
+      ],
+      "admitted_by_seed": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "governance_overhead": 0.7291,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.0432
+    },
+    {
+      "entries": 2,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 41,
+      "offered": 60,
+      "admitted_rate": 0.6833,
+      "admitted_ci": [
+        0.5833,
+        0.7333
+      ],
+      "admitted_by_seed": [
+        0.7333,
+        0.5333,
+        0.7333,
+        0.7333
+      ],
+      "governance_overhead": 0.3501,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.6867
+    },
+    {
+      "entries": 2,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 28,
+      "offered": 60,
+      "admitted_rate": 0.4667,
+      "admitted_ci": [
+        0.4,
+        0.5333
+      ],
+      "admitted_by_seed": [
+        0.4,
+        0.4,
+        0.5333,
+        0.5333
+      ],
+      "governance_overhead": 0.4512,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.4716
+    },
+    {
+      "entries": 2,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 41,
+      "offered": 60,
+      "admitted_rate": 0.6833,
+      "admitted_ci": [
+        0.6667,
+        0.7167
+      ],
+      "admitted_by_seed": [
+        0.6667,
+        0.7333,
+        0.6667,
+        0.6667
+      ],
+      "governance_overhead": 0.5222,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.2224
+    },
+    {
+      "entries": 2,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 48,
+      "offered": 60,
+      "admitted_rate": 0.8,
+      "admitted_ci": [
+        0.7333,
+        0.8833
+      ],
+      "admitted_by_seed": [
+        0.7333,
+        0.8,
+        0.7333,
+        0.9333
+      ],
+      "governance_overhead": 0.6308,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.0494
+    },
+    {
+      "entries": 2,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 52,
+      "offered": 60,
+      "admitted_rate": 0.8667,
+      "admitted_ci": [
+        0.8167,
+        0.9167
+      ],
+      "admitted_by_seed": [
+        0.8,
+        0.8667,
+        0.8667,
+        0.9333
+      ],
+      "governance_overhead": 0.7463,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.0024
+    },
+    {
+      "entries": 3,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 36,
+      "offered": 60,
+      "admitted_rate": 0.6,
+      "admitted_ci": [
+        0.5167,
+        0.6667
+      ],
+      "admitted_by_seed": [
+        0.6667,
+        0.4667,
+        0.6,
+        0.6667
+      ],
+      "governance_overhead": 0.3625,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.57
+    },
+    {
+      "entries": 3,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 20,
+      "offered": 60,
+      "admitted_rate": 0.3333,
+      "admitted_ci": [
+        0.25,
+        0.4
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.2,
+        0.4,
+        0.4
+      ],
+      "governance_overhead": 0.471,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.3249
+    },
+    {
+      "entries": 3,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 24,
+      "offered": 60,
+      "admitted_rate": 0.4,
+      "admitted_ci": [
+        0.3333,
+        0.4667
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.3333,
+        0.4667,
+        0.4667
+      ],
+      "governance_overhead": 0.564,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.1056
+    },
+    {
+      "entries": 3,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 34,
+      "offered": 60,
+      "admitted_rate": 0.5667,
+      "admitted_ci": [
+        0.4333,
+        0.7333
+      ],
+      "admitted_by_seed": [
+        0.4,
+        0.5333,
+        0.5333,
+        0.8
+      ],
+      "governance_overhead": 0.6621,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.0111
+    },
+    {
+      "entries": 3,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 28,
+      "offered": 60,
+      "admitted_rate": 0.4667,
+      "admitted_ci": [
+        0.3667,
+        0.5667
+      ],
+      "admitted_by_seed": [
+        0.4,
+        0.3333,
+        0.5333,
+        0.6
+      ],
+      "governance_overhead": 0.7879,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.0001
+    },
+    {
+      "entries": 5,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 25,
+      "offered": 60,
+      "admitted_rate": 0.4167,
+      "admitted_ci": [
+        0.3,
+        0.5333
+      ],
+      "admitted_by_seed": [
+        0.4667,
+        0.2667,
+        0.6,
+        0.3333
+      ],
+      "governance_overhead": 0.3879,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.3867
+    },
+    {
+      "entries": 5,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 8,
+      "offered": 60,
+      "admitted_rate": 0.1333,
+      "admitted_ci": [
+        0.0333,
+        0.2667
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.3333,
+        0.1333
+      ],
+      "governance_overhead": 0.4961,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.1495
+    },
+    {
+      "entries": 5,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 8,
+      "offered": 60,
+      "admitted_rate": 0.1333,
+      "admitted_ci": [
+        0.0333,
+        0.2333
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.1333,
+        0.1333,
+        0.2667
+      ],
+      "governance_overhead": 0.5961,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0224
+    },
+    {
+      "entries": 5,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 6,
+      "offered": 60,
+      "admitted_rate": 0.1,
+      "admitted_ci": [
+        0.0333,
+        0.1667
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.1333,
+        0.2
+      ],
+      "governance_overhead": 0.7147,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0005
+    },
+    {
+      "entries": 5,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 5,
+      "offered": 60,
+      "admitted_rate": 0.0833,
+      "admitted_ci": [
+        0.0167,
+        0.1667
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.0667,
+        0.2
+      ],
+      "governance_overhead": 0.8191,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 8,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 18,
+      "offered": 60,
+      "admitted_rate": 0.3,
+      "admitted_ci": [
+        0.2333,
+        0.3667
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.2,
+        0.4,
+        0.2667
+      ],
+      "governance_overhead": 0.4024,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.2033
+    },
+    {
+      "entries": 8,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 2,
+      "offered": 60,
+      "admitted_rate": 0.0333,
+      "admitted_ci": [
+        0.0,
+        0.1
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.1333,
+        0.0
+      ],
+      "governance_overhead": 0.5093,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0413
+    },
+    {
+      "entries": 8,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6132,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0017
+    },
+    {
+      "entries": 8,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 1,
+      "offered": 60,
+      "admitted_rate": 0.0167,
+      "admitted_ci": [
+        0.0,
+        0.05
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7237,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 8,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8254,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 4,
+      "offered": 60,
+      "admitted_rate": 0.0667,
+      "admitted_ci": [
+        0.0167,
+        0.1167
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.1333,
+        0.0667
+      ],
+      "governance_overhead": 0.4333,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.075
+    },
+    {
+      "entries": 12,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.5145,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0056
+    },
+    {
+      "entries": 12,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6148,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7267,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8266,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 6,
+      "offered": 60,
+      "admitted_rate": 0.1,
+      "admitted_ci": [
+        0.0667,
+        0.1333
+      ],
+      "admitted_by_seed": [
+        0.1333,
+        0.1333,
+        0.0667,
+        0.0667
+      ],
+      "governance_overhead": 0.4311,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0133
+    },
+    {
+      "entries": 24,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 1,
+      "offered": 60,
+      "admitted_rate": 0.0167,
+      "admitted_ci": [
+        0.0,
+        0.05
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0667
+      ],
+      "governance_overhead": 0.5164,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0002
+    },
+    {
+      "entries": 24,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6195,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7311,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 0.6,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.83,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 1,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 52,
+      "offered": 60,
+      "admitted_rate": 0.8667,
+      "admitted_ci": [
+        0.8167,
+        0.9167
+      ],
+      "admitted_by_seed": [
+        0.8667,
+        0.8,
+        0.9333,
+        0.8667
+      ],
+      "governance_overhead": 0.323,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.8217
+    },
+    {
+      "entries": 1,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 46,
+      "offered": 60,
+      "admitted_rate": 0.7667,
+      "admitted_ci": [
+        0.7333,
+        0.8
+      ],
+      "admitted_by_seed": [
+        0.7333,
+        0.8,
+        0.8,
+        0.7333
+      ],
+      "governance_overhead": 0.4081,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.6752
+    },
+    {
+      "entries": 1,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 36,
+      "offered": 60,
+      "admitted_rate": 0.6,
+      "admitted_ci": [
+        0.55,
+        0.65
+      ],
+      "admitted_by_seed": [
+        0.6,
+        0.6667,
+        0.5333,
+        0.6
+      ],
+      "governance_overhead": 0.5345,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.4559
+    },
+    {
+      "entries": 1,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 20,
+      "offered": 60,
+      "admitted_rate": 0.3333,
+      "admitted_ci": [
+        0.2833,
+        0.3833
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.2667,
+        0.3333,
+        0.4
+      ],
+      "governance_overhead": 0.6901,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.2078
+    },
+    {
+      "entries": 1,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 6,
+      "offered": 60,
+      "admitted_rate": 0.1,
+      "admitted_ci": [
+        0.0667,
+        0.1333
+      ],
+      "admitted_by_seed": [
+        0.1333,
+        0.1333,
+        0.0667,
+        0.0667
+      ],
+      "governance_overhead": 0.817,
+      "seeds": 4,
+      "detectability": 0.1783,
+      "theoretical": 0.0432
+    },
+    {
+      "entries": 2,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 41,
+      "offered": 60,
+      "admitted_rate": 0.6833,
+      "admitted_ci": [
+        0.5833,
+        0.7333
+      ],
+      "admitted_by_seed": [
+        0.7333,
+        0.5333,
+        0.7333,
+        0.7333
+      ],
+      "governance_overhead": 0.3501,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.6867
+    },
+    {
+      "entries": 2,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 28,
+      "offered": 60,
+      "admitted_rate": 0.4667,
+      "admitted_ci": [
+        0.4,
+        0.5333
+      ],
+      "admitted_by_seed": [
+        0.4,
+        0.4,
+        0.5333,
+        0.5333
+      ],
+      "governance_overhead": 0.4512,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.4716
+    },
+    {
+      "entries": 2,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 16,
+      "offered": 60,
+      "admitted_rate": 0.2667,
+      "admitted_ci": [
+        0.2167,
+        0.3167
+      ],
+      "admitted_by_seed": [
+        0.2,
+        0.2667,
+        0.2667,
+        0.3333
+      ],
+      "governance_overhead": 0.5779,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.2224
+    },
+    {
+      "entries": 2,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 5,
+      "offered": 60,
+      "admitted_rate": 0.0833,
+      "admitted_ci": [
+        0.0167,
+        0.1667
+      ],
+      "admitted_by_seed": [
+        0.2,
+        0.0667,
+        0.0,
+        0.0667
+      ],
+      "governance_overhead": 0.7151,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.0494
+    },
+    {
+      "entries": 2,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8236,
+      "seeds": 4,
+      "detectability": 0.3133,
+      "theoretical": 0.0024
+    },
+    {
+      "entries": 3,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 36,
+      "offered": 60,
+      "admitted_rate": 0.6,
+      "admitted_ci": [
+        0.5167,
+        0.6667
+      ],
+      "admitted_by_seed": [
+        0.6667,
+        0.4667,
+        0.6,
+        0.6667
+      ],
+      "governance_overhead": 0.3625,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.57
+    },
+    {
+      "entries": 3,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 20,
+      "offered": 60,
+      "admitted_rate": 0.3333,
+      "admitted_ci": [
+        0.25,
+        0.4
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.2,
+        0.4,
+        0.4
+      ],
+      "governance_overhead": 0.471,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.3249
+    },
+    {
+      "entries": 3,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 6,
+      "offered": 60,
+      "admitted_rate": 0.1,
+      "admitted_ci": [
+        0.0667,
+        0.1333
+      ],
+      "admitted_by_seed": [
+        0.0667,
+        0.1333,
+        0.0667,
+        0.1333
+      ],
+      "governance_overhead": 0.5998,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.1056
+    },
+    {
+      "entries": 3,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 1,
+      "offered": 60,
+      "admitted_rate": 0.0167,
+      "admitted_ci": [
+        0.0,
+        0.05
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7218,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.0111
+    },
+    {
+      "entries": 3,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8239,
+      "seeds": 4,
+      "detectability": 0.43,
+      "theoretical": 0.0001
+    },
+    {
+      "entries": 5,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 25,
+      "offered": 60,
+      "admitted_rate": 0.4167,
+      "admitted_ci": [
+        0.3,
+        0.5333
+      ],
+      "admitted_by_seed": [
+        0.4667,
+        0.2667,
+        0.6,
+        0.3333
+      ],
+      "governance_overhead": 0.3879,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.3867
+    },
+    {
+      "entries": 5,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 8,
+      "offered": 60,
+      "admitted_rate": 0.1333,
+      "admitted_ci": [
+        0.0333,
+        0.2667
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.3333,
+        0.1333
+      ],
+      "governance_overhead": 0.4961,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.1495
+    },
+    {
+      "entries": 5,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6121,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0224
+    },
+    {
+      "entries": 5,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.724,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0005
+    },
+    {
+      "entries": 5,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8245,
+      "seeds": 4,
+      "detectability": 0.6133,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 8,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 18,
+      "offered": 60,
+      "admitted_rate": 0.3,
+      "admitted_ci": [
+        0.2333,
+        0.3667
+      ],
+      "admitted_by_seed": [
+        0.3333,
+        0.2,
+        0.4,
+        0.2667
+      ],
+      "governance_overhead": 0.4024,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.2033
+    },
+    {
+      "entries": 8,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 2,
+      "offered": 60,
+      "admitted_rate": 0.0333,
+      "admitted_ci": [
+        0.0,
+        0.1
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.1333,
+        0.0
+      ],
+      "governance_overhead": 0.5093,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0413
+    },
+    {
+      "entries": 8,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6132,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0017
+    },
+    {
+      "entries": 8,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7251,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 8,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8254,
+      "seeds": 4,
+      "detectability": 0.7967,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 4,
+      "offered": 60,
+      "admitted_rate": 0.0667,
+      "admitted_ci": [
+        0.0167,
+        0.1167
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0667,
+        0.1333,
+        0.0667
+      ],
+      "governance_overhead": 0.4333,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.075
+    },
+    {
+      "entries": 12,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.5145,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0056
+    },
+    {
+      "entries": 12,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6148,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7267,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 12,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.8266,
+      "seeds": 4,
+      "detectability": 0.925,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 1,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 6,
+      "offered": 60,
+      "admitted_rate": 0.1,
+      "admitted_ci": [
+        0.0667,
+        0.1333
+      ],
+      "admitted_by_seed": [
+        0.1333,
+        0.1333,
+        0.0667,
+        0.0667
+      ],
+      "governance_overhead": 0.4311,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0133
+    },
+    {
+      "entries": 24,
+      "probes": 2,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 1,
+      "offered": 60,
+      "admitted_rate": 0.0167,
+      "admitted_ci": [
+        0.0,
+        0.05
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0667
+      ],
+      "governance_overhead": 0.5164,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0002
+    },
+    {
+      "entries": 24,
+      "probes": 4,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.6195,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 8,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.7311,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    },
+    {
+      "entries": 24,
+      "probes": 16,
+      "fresh": true,
+      "threshold": 1.0,
+      "adopted": 0,
+      "offered": 60,
+      "admitted_rate": 0.0,
+      "admitted_ci": [
+        0.0,
+        0.0
+      ],
+      "admitted_by_seed": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "governance_overhead": 0.83,
+      "seeds": 4,
+      "detectability": 0.9867,
+      "theoretical": 0.0
+    }
+  ],
+  "sufficiency": [
+    {
+      "entries": 1,
+      "detectability": 0.1783,
+      "k_theory": 12,
+      "k_proportional": null,
+      "k_strict": 16,
+      "overhead_strict": 0.817
+    },
+    {
+      "entries": 2,
+      "detectability": 0.3133,
+      "k_theory": 7,
+      "k_proportional": null,
+      "k_strict": 8,
+      "overhead_strict": 0.7151
+    },
+    {
+      "entries": 3,
+      "detectability": 0.43,
+      "k_theory": 5,
+      "k_proportional": null,
+      "k_strict": 4,
+      "overhead_strict": 0.5998
+    },
+    {
+      "entries": 5,
+      "detectability": 0.6133,
+      "k_theory": 3,
+      "k_proportional": 8,
+      "k_strict": 4,
+      "overhead_strict": 0.6121
+    },
+    {
+      "entries": 8,
+      "detectability": 0.7967,
+      "k_theory": 2,
+      "k_proportional": 2,
+      "k_strict": 2,
+      "overhead_strict": 0.5093
+    },
+    {
+      "entries": 12,
+      "detectability": 0.925,
+      "k_theory": 1,
+      "k_proportional": 1,
+      "k_strict": 1,
+      "overhead_strict": 0.4333
+    },
+    {
+      "entries": 24,
+      "detectability": 0.9867,
+      "k_theory": 1,
+      "k_proportional": 1,
+      "k_strict": 1,
+      "overhead_strict": 0.4311
+    }
+  ],
+  "probe_grid": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ]
+}

@@ -41,8 +41,8 @@ from skill_diplomacy.metrics.stats import (all_or_nothing, bootstrap_ci,
                                            dispersion_test, min_achievable_p,
                                            permutation_test, wilson)
 
-from .svg import (INK, MUTED, SERIES, Axes, grouped_bars, hrule, line, strip,
-                  xticks_linear)
+from .svg import (GRID, INK, MUTED, SERIES, Axes, grouped_bars, hrule, line,
+                  strip, xticks_linear)
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNS = ROOT / "runs"
@@ -333,6 +333,86 @@ def fig6_governance_coverage() -> str:
     return ax.render()
 
 
+def fig7_sufficiency() -> str:
+    """The acceptance rule dominates the screening depth.
+
+    Both panels are admission rate against probe depth, one curve per defect
+    symptom rate d. Left: the proportional rule the tier shipped with (accept if
+    60% of probes pass). Right: strict (any failure rejects). Same defects, same
+    depths, same cost. Under the strict rule the curves fall and track (1-d)^k;
+    under the proportional rule the quiet defects rise toward certainty, because
+    adding probes concentrates the observed failure fraction on d and a d below
+    the rule's tolerance stops producing the chance rejections a shallow screen
+    got for free."""
+    src = RUNS / "sufficiency.json"
+    if not src.exists():
+        return ""
+    data = json.loads(src.read_text())
+    rows = data["rows"]
+    if not rows or "threshold" not in rows[0]:
+        return ""
+    ks = data["probe_grid"]
+    ds = sorted({r["detectability"] for r in rows})
+    shown = [ds[0], ds[2], ds[4]] if len(ds) >= 5 else ds
+
+    ax = Axes(width=860, height=500, ymin=0.0, ymax=1.08,
+              title="A screening rule stated as a pass rate has a blind band",
+              subtitle=("harness, adversarial trade, re-drawn probes, 4 seeds. Same defects, "
+                        "same depths, same cost — only the acceptance rule differs."),
+              ylabel="fraction of poisoned artifacts admitted",
+              xlabel="probes drawn per screening event")
+    ax.gridlines([0, 0.25, 0.5, 0.75, 1.0])
+
+    # two panels side by side inside one axes
+    mid = (ax.x0 + ax.x1) / 2
+    ax.add(f'<line x1="{mid:.1f}" y1="{ax.y1}" x2="{mid:.1f}" y2="{ax.y0}" '
+           f'stroke="{GRID}" stroke-width="1"/>')
+    panels = ((0.6, ax.x0 + 24, mid - 30, "proportional — 60% of probes must pass"),
+              (1.0, mid + 34, ax.x1 - 20, "strict — any probe failure rejects"))
+    for threshold, px0, px1, label in panels:
+        ax.text((px0 + px1) / 2, ax.y1 - 8, label, size=11.5, weight="600")
+        for i, k in enumerate(ks):
+            x = px0 + (px1 - px0) * i / max(1, len(ks) - 1)
+            ax.add(f'<line x1="{x:.1f}" y1="{ax.y0}" x2="{x:.1f}" y2="{ax.y0+5}" '
+                   f'stroke="{MUTED}" stroke-width="1"/>')
+            ax.text(x, ax.y0 + 19, str(k), size=11, fill=MUTED)
+        for si, d in enumerate(shown):
+            colour = SERIES[si % len(SERIES)]
+            ys = []
+            for k in ks:
+                r = next((x for x in rows if x["detectability"] == d
+                          and x["probes"] == k and x["threshold"] == threshold), None)
+                ys.append(r["admitted_rate"] if r else 0.0)
+            pts = [(px0 + (px1 - px0) * i / max(1, len(ks) - 1), ax.sy(y))
+                   for i, y in enumerate(ys)]
+            dpath = " ".join(("M" if i == 0 else "L") + f"{a:.1f},{b:.1f}"
+                             for i, (a, b) in enumerate(pts))
+            ax.add(f'<path d="{dpath}" fill="none" stroke="{colour}" stroke-width="2.2"/>')
+            for a, b in pts:
+                ax.add(f'<circle cx="{a:.1f}" cy="{b:.1f}" r="3" fill="{colour}"/>')
+            # the analytic prediction, for comparison
+            tp = [(px0 + (px1 - px0) * i / max(1, len(ks) - 1), ax.sy((1 - d) ** k))
+                  for i, k in enumerate(ks)]
+            tpath = " ".join(("M" if i == 0 else "L") + f"{a:.1f},{b:.1f}"
+                             for i, (a, b) in enumerate(tp))
+            ax.add(f'<path d="{tpath}" fill="none" stroke="{colour}" stroke-width="1.2" '
+                   f'stroke-dasharray="3 3" opacity="0.6"/>')
+    ax.frame()
+    ax.legend([(f"defect symptom rate d = {d:.2f}", SERIES[i % len(SERIES)])
+               for i, d in enumerate(shown)])
+    ax.text(ax.x0, ax.height - 47,
+            "Dashed: the analytic prediction (1-d)^k, which assumes a single failure is disqualifying.",
+            size=10.5, anchor="start", fill=MUTED)
+    ax.text(ax.x0, ax.height - 34,
+            "Right panel tracks it across the range. Left panel inverts below the rule's tolerance: "
+            "at d = 0.18, sixteen probes admit 100%.",
+            size=10.5, anchor="start", fill=MUTED)
+    ax.text(ax.x0, ax.height - 21,
+            "Depth is not a dial on protection unless the rule is strict. Under a pass-rate rule it is a dial on variance.",
+            size=10.5, anchor="start", fill=INK)
+    return ax.render()
+
+
 FIGURES = {
     "fig1_skill_lift": fig1_skill_lift,
     "fig2_two_contrasts": fig2_two_contrasts,
@@ -340,6 +420,7 @@ FIGURES = {
     "fig4_inequality": fig4_inequality,
     "fig5_ratchet": fig5_ratchet,
     "fig6_governance_coverage": fig6_governance_coverage,
+    "fig7_sufficiency": fig7_sufficiency,
 }
 
 

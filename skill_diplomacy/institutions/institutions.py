@@ -60,7 +60,14 @@ class AdversarialTrade(FreeTrade):
     name: str = "adversarial_trade"
     poisoner: str = ""
     poisoners: list[str] = field(default_factory=list)
-    poison_families: tuple = ("unit_chain", "lexicon")
+    # Every archetype that has a contaminant class defined for it. A missing
+    # entry does not error — it silently switches the poison off, so the whole
+    # contamination experiment reports 0 offered / 0 adopted and reads as
+    # "screening works perfectly". That happened when `protocol` was added, and
+    # the comment on `poisons_family` below already warned about the same shape
+    # for variants. `experiment/grid.py` now refuses an adversarial trial whose
+    # bank contains nothing poisonable, so the next omission fails loudly.
+    poison_families: tuple = ("unit_chain", "lexicon", "protocol")
     poison_rate: float = 0.5
 
     def is_poisoner(self, state: str) -> bool:
@@ -125,7 +132,8 @@ def is_poisoned_artifact(artifact: dict) -> bool:
 
 
 def poison_artifact(artifact: dict,
-                    protocol_poison_mode: str = "substitution") -> dict:
+                    protocol_poison_mode: str = "substitution",
+                    protocol_poison_entries: int = 1) -> dict:
     """Corrupt an artifact in the way its own kind is plausibly corrupted.
 
     A procedural playbook gets a bogus shortcut rule; a reference table gets an
@@ -134,7 +142,8 @@ def poison_artifact(artifact: dict,
     poisoned correctly however it was labelled and wherever it is intercepted.
     Idempotent: re-exports do not stack markers.
 
-    `protocol_poison_mode` selects how detectable the protocol defect is —
+    `protocol_poison_mode` and `protocol_poison_entries` select how detectable
+    the protocol defect is —
     `substitution` (~16% of instances wrong, the hard case) by default, or
     `weight` (~89%, the loud one). Defaulting to the hard case is deliberate:
     the easy one is caught by any screen that runs at all, so a contamination
@@ -150,7 +159,9 @@ def poison_artifact(artifact: dict,
     if "| glyph | value |" in body:
         poisoned["body"] = poison_lexicon_body(body)
     elif "Positional weight cycle:" in body:
-        poisoned["body"] = poison_protocol_body(body, mode=protocol_poison_mode)
+        poisoned["body"] = poison_protocol_body(
+            body, mode=protocol_poison_mode,
+            n_entries=protocol_poison_entries)
     else:
         poisoned["body"] = body.rstrip() + POISON_TEXT
     poisoned["_poisoned"] = True  # convenience flag; the BODY is the ground truth

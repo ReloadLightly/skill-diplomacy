@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="500" viewBox="0 0 860 500" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="860" height="500" fill="#ffffff"/>
+<text x="72" y="26" font-size="15.5" font-weight="600" fill="#1a1a1a">A screening rule stated as a pass rate has a blind band</text>
+<text x="72" y="44" font-size="11.5" fill="#6b7280">harness, adversarial trade, re-drawn probes, 4 seeds. Same defects, same depths, same cost — only the acceptance rule differs.</text>
+<text x="18" y="240.0" font-size="12" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 240.0)">fraction of poisoned artifacts admitted</text>
+<text x="454.0" y="484" font-size="12" fill="#6b7280" text-anchor="middle">probes drawn per screening event</text>
+<line x1="72" y1="424.0" x2="836" y2="424.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="428.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
+<line x1="72" y1="338.8" x2="836" y2="338.8" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="342.8" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.25</text>
+<line x1="72" y1="253.6" x2="836" y2="253.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="257.6" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.5</text>
+<line x1="72" y1="168.4" x2="836" y2="168.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="172.4" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.75</text>
+<line x1="72" y1="83.3" x2="836" y2="83.3" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="87.3" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">1</text>
+<line x1="454.0" y1="56" x2="454.0" y2="424" stroke="#e5e7eb" stroke-width="1"/>
+<text x="260.0" y="48.0" font-size="11.5" text-anchor="middle" fill="#1a1a1a" font-weight="600">proportional — 60% of probes must pass</text>
+<line x1="96.0" y1="424" x2="96.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="96.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">1</text>
+<line x1="178.0" y1="424" x2="178.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="178.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">2</text>
+<line x1="260.0" y1="424" x2="260.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="260.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">4</text>
+<line x1="342.0" y1="424" x2="342.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="342.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">8</text>
+<line x1="424.0" y1="424" x2="424.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="424.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">16</text>
+<path d="M96.0,128.7 L178.0,162.8 L260.0,134.4 L342.0,88.9 L424.0,83.3" fill="none" stroke="#0072B2" stroke-width="2.2"/>
+<circle cx="96.0" cy="128.7" r="3" fill="#0072B2"/>
+<circle cx="178.0" cy="162.8" r="3" fill="#0072B2"/>
+<circle cx="260.0" cy="134.4" r="3" fill="#0072B2"/>
+<circle cx="342.0" cy="88.9" r="3" fill="#0072B2"/>
+<circle cx="424.0" cy="83.3" r="3" fill="#0072B2"/>
+<path d="M96.0,144.0 L178.0,193.9 L260.0,268.7 L342.0,353.2 L424.0,409.3" fill="none" stroke="#0072B2" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<path d="M96.0,219.6 L178.0,310.4 L260.0,287.7 L342.0,230.9 L424.0,265.0" fill="none" stroke="#D55E00" stroke-width="2.2"/>
+<circle cx="96.0" cy="219.6" r="3" fill="#D55E00"/>
+<circle cx="178.0" cy="310.4" r="3" fill="#D55E00"/>
+<circle cx="260.0" cy="287.7" r="3" fill="#D55E00"/>
+<circle cx="342.0" cy="230.9" r="3" fill="#D55E00"/>
+<circle cx="424.0" cy="265.0" r="3" fill="#D55E00"/>
+<path d="M96.0,229.8 L178.0,313.3 L260.0,388.0 L342.0,420.2 L424.0,424.0" fill="none" stroke="#D55E00" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<path d="M96.0,321.8 L178.0,412.7 L260.0,424.0 L342.0,418.3 L424.0,424.0" fill="none" stroke="#009E73" stroke-width="2.2"/>
+<circle cx="96.0" cy="321.8" r="3" fill="#009E73"/>
+<circle cx="178.0" cy="412.7" r="3" fill="#009E73"/>
+<circle cx="260.0" cy="424.0" r="3" fill="#009E73"/>
+<circle cx="342.0" cy="418.3" r="3" fill="#009E73"/>
+<circle cx="424.0" cy="424.0" r="3" fill="#009E73"/>
+<path d="M96.0,354.7 L178.0,409.9 L260.0,423.4 L342.0,424.0 L424.0,424.0" fill="none" stroke="#009E73" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<text x="652.0" y="48.0" font-size="11.5" text-anchor="middle" fill="#1a1a1a" font-weight="600">strict — any probe failure rejects</text>
+<line x1="488.0" y1="424" x2="488.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="488.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">1</text>
+<line x1="570.0" y1="424" x2="570.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="570.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">2</text>
+<line x1="652.0" y1="424" x2="652.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="652.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">4</text>
+<line x1="734.0" y1="424" x2="734.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="734.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">8</text>
+<line x1="816.0" y1="424" x2="816.0" y2="429" stroke="#6b7280" stroke-width="1"/>
+<text x="816.0" y="443.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">16</text>
+<path d="M488.0,128.7 L570.0,162.8 L652.0,219.6 L734.0,310.4 L816.0,389.9" fill="none" stroke="#0072B2" stroke-width="2.2"/>
+<circle cx="488.0" cy="128.7" r="3" fill="#0072B2"/>
+<circle cx="570.0" cy="162.8" r="3" fill="#0072B2"/>
+<circle cx="652.0" cy="219.6" r="3" fill="#0072B2"/>
+<circle cx="734.0" cy="310.4" r="3" fill="#0072B2"/>
+<circle cx="816.0" cy="389.9" r="3" fill="#0072B2"/>
+<path d="M488.0,144.0 L570.0,193.9 L652.0,268.7 L734.0,353.2 L816.0,409.3" fill="none" stroke="#0072B2" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<path d="M488.0,219.6 L570.0,310.4 L652.0,389.9 L734.0,418.3 L816.0,424.0" fill="none" stroke="#D55E00" stroke-width="2.2"/>
+<circle cx="488.0" cy="219.6" r="3" fill="#D55E00"/>
+<circle cx="570.0" cy="310.4" r="3" fill="#D55E00"/>
+<circle cx="652.0" cy="389.9" r="3" fill="#D55E00"/>
+<circle cx="734.0" cy="418.3" r="3" fill="#D55E00"/>
+<circle cx="816.0" cy="424.0" r="3" fill="#D55E00"/>
+<path d="M488.0,229.8 L570.0,313.3 L652.0,388.0 L734.0,420.2 L816.0,424.0" fill="none" stroke="#D55E00" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<path d="M488.0,321.8 L570.0,412.7 L652.0,424.0 L734.0,424.0 L816.0,424.0" fill="none" stroke="#009E73" stroke-width="2.2"/>
+<circle cx="488.0" cy="321.8" r="3" fill="#009E73"/>
+<circle cx="570.0" cy="412.7" r="3" fill="#009E73"/>
+<circle cx="652.0" cy="424.0" r="3" fill="#009E73"/>
+<circle cx="734.0" cy="424.0" r="3" fill="#009E73"/>
+<circle cx="816.0" cy="424.0" r="3" fill="#009E73"/>
+<path d="M488.0,354.7 L570.0,409.9 L652.0,423.4 L734.0,424.0 L816.0,424.0" fill="none" stroke="#009E73" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.6"/>
+<line x1="72" y1="424" x2="836" y2="424" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="72.0" y="25.0" width="11" height="11" rx="2" fill="#0072B2"/>
+<text x="88.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">defect symptom rate d = 0.18</text>
+<rect x="293.6" y="25.0" width="11" height="11" rx="2" fill="#D55E00"/>
+<text x="309.6" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">defect symptom rate d = 0.43</text>
+<rect x="515.2" y="25.0" width="11" height="11" rx="2" fill="#009E73"/>
+<text x="531.2" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">defect symptom rate d = 0.80</text>
+<text x="72.0" y="453.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">Dashed: the analytic prediction (1-d)^k, which assumes a single failure is disqualifying.</text>
+<text x="72.0" y="466.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">Right panel tracks it across the range. Left panel inverts below the rule&#x27;s tolerance: at d = 0.18, sixteen probes admit 100%.</text>
+<text x="72.0" y="479.0" font-size="10.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">Depth is not a dial on protection unless the rule is strict. Under a pass-rate rule it is a dial on variance.</text>
+</svg>

@@ -118,6 +118,20 @@ class TrialConfig:
     fresh_probes: bool = False           # re-draw the probe suite per screening
                                          # event rather than once per round. See
                                          # _consider_adoption. False reproduces v1.
+    # How detectable the injected protocol defect is. Corrupting k entries of
+    # the substitution table gives d ~ 0.17 (k=1) up to 0.99 (k=24), which is
+    # the axis "how much should you check?" is actually a function of.
+    protocol_poison_mode: str = "substitution"
+    protocol_poison_entries: int = 1
+    # How the probe tier DECIDES, as opposed to how deep it looks. 0.6 -- accept
+    # if 60% of probes pass -- was hardcoded in quarantine.py and is the more
+    # natural-sounding rule; 1.0 rejects on any single failure. The two are not
+    # a matter of taste: a proportional rule has a blind band, because the
+    # observed failure fraction concentrates on the defect's true symptom rate
+    # as probes are added, so a defect quieter than the rule's tolerance becomes
+    # MORE certain to be admitted the more you screen. See run_sufficiency.py.
+    probe_threshold: float = 0.6
+    regression_threshold: float = 1.0
     screen_bankruptcy: str = "refuse"    # refuse | adopt_unscreened — what a
                                          # state does when it CANNOT AFFORD to
                                          # screen an import. E4's core modelled
@@ -350,6 +364,23 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
     gens, families = _bank(cfg)
     shards = _shards(cfg, list(names), list(families))
     inst = _make_institution(cfg, names)
+    # A contamination experiment in which nothing can be contaminated reports
+    # 0 offered and 0 adopted, which every downstream metric renders as an
+    # admission rate of 0.0 — indistinguishable from perfect screening. This is
+    # the single most dangerous silent failure available here, and it has
+    # occurred: adding the `protocol` archetype left it out of
+    # AdversarialTrade.poison_families and produced a full sweep of vacuous
+    # zeroes. Refuse the run instead.
+    if isinstance(inst, AdversarialTrade):
+        poisonable = [f for f in families if inst.poisons_family(f)]
+        if not poisonable:
+            raise ValueError(
+                f"adversarial_trade over families {sorted(families)}, none of "
+                f"which is poisonable. AdversarialTrade.poison_families is "
+                f"{inst.poison_families}; an archetype missing from it cannot be "
+                f"contaminated, so every poison metric would be a vacuous zero "
+                f"rather than evidence of screening.")
+
     policies = _policies(cfg, names)
 
     states: dict = {}
@@ -470,7 +501,9 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
                   and inst.is_poisoner(exporter_name)
                   and inst.poisons_family(fam))
     if first_hand:
-        artifact = poison_artifact(artifact)
+        artifact = poison_artifact(
+            artifact, protocol_poison_mode=cfg.protocol_poison_mode,
+            protocol_poison_entries=cfg.protocol_poison_entries)
     poisoned = is_poisoned_artifact(artifact)
     chash = _artifact_hash(artifact)
 
@@ -503,7 +536,9 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
     try:
         report = run_quarantine(
             cfg.quarantine, regression, probes,
-            evaluate=lambda t: importer.attempt(model, t, phase="quarantine"))
+            evaluate=lambda t: importer.attempt(model, t, phase="quarantine"),
+            regression_threshold=cfg.regression_threshold,
+            probe_threshold=cfg.probe_threshold)
     except BudgetExceeded:
         # The importer ran out of budget MID-SCREEN. v1/sprint-2 let this
         # exception escape the exchange phase and kill the whole trial, which is

@@ -399,6 +399,78 @@ Not defects. Recorded here because they were discovered by fixing the ones
 above, and because the first of them is the strongest result the repository
 currently holds.
 
+### A6. A new archetype silently disabled the contamination experiment · **closed**
+
+`AdversarialTrade.poison_families` listed `("unit_chain", "lexicon")`. Adding
+`protocol` without adding it there meant `poisons_family("protocol")` returned
+False, so no poison was ever offered — and a full detectability sweep reported
+`offered = 0, adopted = 0` for every cell, which every downstream metric renders
+as an admission rate of **0.0**, i.e. perfect screening.
+
+This is the most dangerous silent failure available in this repository: a
+contamination experiment in which nothing is contaminated does not error, it
+reports that governance works. The docstring on `poisons_family` already warned
+about the identical shape for variant families, and the omission happened anyway
+one function above it.
+
+Repair: `protocol` added, and `experiment/grid.py` now **refuses** an adversarial
+trial whose bank contains no poisonable family, naming the config that is wrong.
+A guard, not a comment, because the comment did not work.
+
+### F2. The screening rule dominates the screening depth
+
+A screen drawing k independent probes against a defect wrong on a fraction d of
+instances should miss it with probability (1 − d)^k. That is true only if a
+single failure is disqualifying. `quarantine.py` shipped `probe_threshold = 0.6`
+— accept if 60% of probes pass — and under a proportional rule the arithmetic
+reverses.
+
+As probes are added the *observed* failure fraction concentrates on d. If d sits
+below the rule's tolerance (1 − 0.6 = 0.4), concentration removes the chance
+rejections a shallow screen gets for free, and admission rises toward certainty.
+Measured at d = 0.178, re-drawn probes, 4 seeds:
+
+| probes | 1 | 2 | 4 | 8 | 16 |
+|---|---|---|---|---|---|
+| proportional (60%) | 0.87 | 0.77 | 0.85 | 0.98 | **1.00** |
+| strict (any failure) | 0.87 | 0.77 | 0.60 | 0.33 | **0.10** |
+| (1 − d)^k | 0.82 | 0.68 | 0.46 | 0.21 | 0.04 |
+
+Sufficiency — the cheapest depth reaching 10% admission:
+
+| d | k* (theory) | proportional | strict | overhead at k |
+|---|---|---|---|---|
+| 0.178 | 12 | **>16** | 16 | 0.817 |
+| 0.313 | 7 | **>16** | 8 | 0.715 |
+| 0.430 | 5 | **>16** | 4 | 0.600 |
+| 0.613 | 3 | 8 | 4 | 0.612 |
+| 0.797 | 2 | 2 | 2 | 0.509 |
+| 0.925 | 1 | 1 | 1 | 0.433 |
+
+Three things follow.
+
+**A rule stated as a pass rate has a blind band.** Every defect quieter than its
+tolerance is not merely hard to catch — it becomes *more* certain to be admitted
+the more you spend looking. Under the proportional rule no depth within budget
+reaches 10% admission for d ≤ 0.43.
+
+**Depth is the wrong dial.** "How much should you check?" was the question this
+repository was built around, and the answer is that the amount is second: make
+the rule strict, then buy depth. Under a pass-rate rule, depth is a dial on
+variance rather than on protection, and the only defects it catches are the ones
+it would already have caught at k = 1.
+
+**The strict rule recovers the analytic prediction across the range**, which is
+the internal-validity check `CRITIQUE.md` §4 asked for and the repository did not
+have: before trusting a novel screening claim, the harness has to reproduce the
+known result in the regime where the known result applies. It does.
+
+This is the fixed-versus-re-drawn finding (§A3) arriving from the other
+direction. There the screen's *sampling* decided what it could see; here its
+*decision rule* does. Neither is a question of how much you check.
+
+Reproduce: `python run_sufficiency.py`. Figure: `paper/fig/fig7_sufficiency.svg`.
+
 ### F1. Ungated self-improvement destroys the knowledge it was meant to build
 
 An agent that holds a correct procedure and fails a task anyway is in a
@@ -458,7 +530,7 @@ Reproduce: `python run_ratchet.py`. Figure: `paper/fig/fig5_ratchet.svg`.
 
 | | closed | open | won't fix |
 |---|---|---|---|
-| A. measurement | 5 | 0 | 0 |
+| A. measurement | 6 | 0 | 0 |
 | B. silent failure | 6 | 0 | 0 |
 | C. provenance | 3 | 2 | 0 |
 | D. claims | 8 | 0 | 0 |
