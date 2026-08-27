@@ -191,39 +191,47 @@ def claim_live_statistics() -> dict:
 
 
 def claim_ratchet() -> dict:
-    """The result that requires fallible agents to exist at all.
+    """The corrected finding: the damage is the edit operator.
 
-    Under autarky — no exchange, no adversary, no imports — an agent endowed
-    with a correct procedure and failing occasionally through execution error
-    rewrites that procedure and ends below where it started. Screening its own
-    edits prevents it. At perfect reliability the gate is worth exactly nothing,
-    which is why a perfect-solver null model cannot see the effect."""
+    A loop that replaces a doctrine wholesale destroys an endowed procedure; the
+    same loop appending costs almost nothing. And the gated arm equals the
+    never-improve arm exactly, which is why the earlier "screening buys
+    capability" reading was wrong — see DEFECTS.md section F1."""
     from skill_diplomacy.experiment.oracle import make_oracle
     from skill_diplomacy.harness.fallible import FallibleModel
 
-    def run(gated: bool, reliability: float, seed: int) -> float:
+    def run(mode: str, improve: bool, gated: bool, reliability: float,
+            seed: int) -> float:
         cfg = TrialConfig(institution="autarky",
                           quarantine=(QuarantineLevel.REGRESSION if gated
                                       else QuarantineLevel.NONE),
-                          gate_self_edits=gated, seed=seed, rounds=4,
-                          tasks_per_round=3, k_trials=1, n_states=3, n_variants=3,
-                          archetypes=("protocol",), seed_references=True)
+                          gate_self_edits=gated, self_improve=improve,
+                          self_edit_mode=mode, seed=seed, rounds=4,
+                          tasks_per_round=3, k_trials=1, n_states=3,
+                          n_variants=3, archetypes=("protocol",),
+                          seed_references=True)
         m = FallibleModel(make_oracle(lambda s, f: False),
                           reliability=reliability, seed=seed)
         return run_trial(cfg, model=m)["mean_capability"]
 
     seeds = range(8)
     out = {}
-    for r in (1.0, 0.98):
-        un = [run(False, r, s) for s in seeds]
-        ga = [run(True, r, s) for s in seeds]
-        tag = str(r).replace(".", "_")
-        out[f"ungated_r{tag}"] = round(sum(un) / len(un), 4)
-        out[f"gated_r{tag}"] = round(sum(ga) / len(ga), 4)
-        out[f"gap_r{tag}"] = round((sum(ga) - sum(un)) / len(un), 4)
-        if r < 1.0:
-            out[f"p_r{tag}"] = permutation_test(un, ga)["p"]
-    out["gate_is_inert_for_a_perfect_solver"] = out["gap_r1_0"] == 0.0
+    for mode in ("replace", "append"):
+        off = [run(mode, False, False, 0.98, s) for s in seeds]
+        un = [run(mode, True, False, 0.98, s) for s in seeds]
+        ga = [run(mode, True, True, 0.98, s) for s in seeds]
+        out[f"{mode}_off"] = round(sum(off) / len(off), 4)
+        out[f"{mode}_ungated"] = round(sum(un) / len(un), 4)
+        out[f"{mode}_gated"] = round(sum(ga) / len(ga), 4)
+        out[f"{mode}_operator_cost"] = round((sum(un) - sum(off)) / len(off), 4)
+        out[f"{mode}_p"] = permutation_test(off, un)["p"]
+        out[f"{mode}_gate_equals_never_improving"] = (
+            [round(a, 6) for a in ga] == [round(b, 6) for b in off])
+    out["replace_is_worse_than_append"] = (
+        out["replace_operator_cost"] < out["append_operator_cost"] - 0.15)
+    perfect = {run(m, i, g, 1.0, 0) for m in ("replace", "append")
+               for i, g in ((False, False), (True, False), (True, True))}
+    out["all_arms_identical_at_perfect_reliability"] = len(perfect) == 1
     return out
 
 

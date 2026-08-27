@@ -399,6 +399,25 @@ Not defects. Recorded here because they were discovered by fixing the ones
 above, and because the first of them is the strongest result the repository
 currently holds.
 
+### A7. The self-edit gate accepted 492 of 492 edits vacuously · **closed**
+
+`run_quarantine` treated an empty suite as a pass. An agent that has just failed
+its home family usually has an empty regression store, so the self-edit gate
+accepted unconditionally: instrumented across the whole reliability sweep,
+**492 accepts, 492 vacuous, 0 on the merits**. An experiment reported as
+"screened versus unscreened" was therefore self-editing off versus on, and the
+headline claim drawn from it was wrong (§F1).
+
+Third instance of this defect family, after §B2 and §B6. Failing closed does not
+fix it — the gate then rejects everything and still never discriminates. The
+repair is to give it evidence: `state.improve_from_failure` now escalates to
+fresh probes when it has no history to regress against, and refuses rather than
+waves through. `QuarantineReport.vacuous` marks any acceptance that rested on an
+empty suite so it can never again be counted as a screening decision.
+
+Found by a four-agent adversarial review of my own result, then verified by hand
+before acting on it.
+
 ### A6. A new archetype silently disabled the contamination experiment · **closed**
 
 `AdversarialTrade.poison_families` listed `("unit_chain", "lexicon")`. Adding
@@ -471,56 +490,73 @@ direction. There the screen's *sampling* decided what it could see; here its
 
 Reproduce: `python run_sufficiency.py`. Figure: `paper/fig/fig7_sufficiency.svg`.
 
-### F1. Ungated self-improvement destroys the knowledge it was meant to build
+### F1. A blind overwrite destroys the doctrine it was meant to improve
 
-An agent that holds a correct procedure and fails a task anyway is in a
-situation the self-improvement loop cannot read. The loop's trigger is failure;
-its inference is "I lack a doctrine for this family"; its action is to write
-one. But a competent agent's failure is often an execution slip rather than a
-knowledge gap, and the doctrine it then writes is worse than the one it already
-had. Ungated, the edit is committed, the correct procedure is overwritten
-(verified on disk: the endowed protocol spec is gone, replaced by the generic
-playbook), every subsequent attempt fails, and that triggers further
-"improvement". Capability does not decay — it collapses and does not recover.
+**This section replaces an earlier claim of mine that was wrong.** It read
+"screening your own edits is where the capability comes from", and it was
+refuted by a four-agent adversarial review that I then verified by hand. The
+refutation was correct and the correction is recorded here rather than quietly
+edited, because how the claim failed is the more useful part.
 
-Measured under **autarky**: no exchange, no adversary, no imports. Whatever
-happens, the agent does to itself. Eight seeds per point, `protocol` families.
+**How it failed.** The gate under test never screened anything. Instrumenting
+the whole sweep: **492 accepted self-edits, 492 accepted vacuously, 0 accepted
+on the merits.** An agent that has just failed its home family usually has an
+empty regression store, and `run_quarantine` passed an empty suite
+unconditionally, so every acceptance was a pass-through. The contrast reported
+as "screened versus unscreened" was self-editing being off versus on. This is
+the third gate in this repository found to read as screening while screening
+nothing, after `--endowment step` without great powers (§B2) and
+`gate_self_edits` without a quarantine tier (§B6).
 
-| per-step reliability | self-edits ungated | self-edits screened | gate buys |
+Making the gate fail closed does not rescue it: it then rejects *every* edit, so
+it still never discriminates, it just errs the other way. The gate now escalates
+to fresh probes when it has no history to regress against — which is real
+screening — and `QuarantineReport.vacuous` marks any acceptance that rested on
+an empty suite, so this can never again be counted as evidence.
+
+**What survives, and it is narrower and better.** The trigger of the loop is
+failure; its inference is "I lack a doctrine for this family"; and its action
+here was a **blind full-body overwrite** of a doctrine the authoring agent is
+never shown — `improve_from_failure` put only the failed task in the prompt, and
+`add_skill` wrote the reply over whatever was there. Autarky, 98% per-step
+reliability, 8 seeds, `protocol` families:
+
+| edit operator | self-improve off | on, ungated | on, gated |
 |---|---|---|---|
-| 1.000 | 0.333 | 0.333 | **+0.000** |
-| 0.995 | 0.190 | 0.329 | +0.139 |
-| 0.990 | 0.125 | 0.282 | +0.157 |
-| **0.980** | **0.037** | **0.241** | **+0.204** (p = 0.0019, exact) |
-| 0.970 | 0.000 | 0.180 | +0.180 |
-| 0.950 | 0.000 | 0.157 | +0.157 |
-| 0.900 | 0.014 | 0.093 | +0.079 |
+| **replace** | 0.287 | **0.037** | 0.287 |
+| **append** | 0.287 | 0.278 | 0.255 |
 
-Three things make this worth reporting.
+At 97% reliability `replace` costs **0.287 — every point of capability the agent
+was endowed with** (0.287 → 0.000, p = 0.0002 exact, design floor 0.0002). The
+same loop under `append` costs 0.037 at worst and is **not significant**
+(p = 0.11). Same failures, same budget, same absence of screening; the only
+difference is whether the prior doctrine survives the edit.
 
-**It is the first statistically significant result in the repository.** p =
-0.0019 by exact permutation at eight seeds per arm, against a design floor of
-0.0002. Every other contrast here is either deterministic or underpowered.
+So the damage is the **edit operator**. No deployed `SKILL.md` editing loop
+overwrites a skill without showing the model the skill, which makes `replace`
+the unrealistic setting and its damage a property of this harness's operator
+rather than of self-improvement as such. Stated as a design lesson: *a
+failure-triggered rewrite must not discard evidence it was never shown.*
 
-**The effect is exactly zero for a perfect solver**, and that is the control
-that makes it meaningful rather than a caveat that weakens it. A competent
-agent never fails at home, so the destructive branch is unreachable, and no
-amount of running the existing harness could have found this. The finding is
-downstream of §B5.
+**Three limits belong with the number, and the first is the sharpest.**
 
-**It reframes the price of governance.** Screening is argued for on
-contamination grounds — check what you import, someone may have poisoned it.
-This is a different and more basic argument, and it holds with no adversary
-anywhere in the system: screening your *own* edits is what makes
-self-improvement monotone. Against imports, governance trades capability for
-safety. Against self-edits it does not trade at all — it is where the capability
-comes from.
+The gate adds nothing a disabled loop would not. Under `replace` the gated arm
+equals the never-improve arm **element-wise at every reliability**. That is not
+evidence that screening keeps good edits and rejects bad ones — it is evidence
+that rejecting every edit beats this loop.
 
-The effect is also non-monotone in reliability, peaking near 0.98: the gate
-matters only when failures are frequent enough to trigger a rewrite and rare
-enough that the doctrine being overwritten is still worth having. That shape
-echoes the interior maximum in the inequality result, and has the same kind of
-mechanism behind it.
+It cannot be evidence of that, by construction. The scripted stand-in answers
+every improvement request with one fixed playbook carrying no family
+information, so P(beneficial self-edit) = 0 identically. `--mode revise`, which
+shows the model its current doctrine, returns exactly the `replace` numbers for
+the same reason: the stand-in ignores the prompt. Whether a gate can
+*discriminate* is a live-model question this harness cannot answer.
+
+The zero at reliability 1.0 is a consistency check, not a control:
+`improve_from_failure` is called zero times in every arm there, so the arms
+execute identical code and no other outcome was available. And the `protocol`
+archetype was not required to see any of this — `lexicon` plus `FallibleModel`
+shows it too. Only `harness/fallible.py` was load-bearing.
 
 Reproduce: `python run_ratchet.py`. Figure: `paper/fig/fig5_ratchet.svg`.
 
@@ -530,7 +566,7 @@ Reproduce: `python run_ratchet.py`. Figure: `paper/fig/fig5_ratchet.svg`.
 
 | | closed | open | won't fix |
 |---|---|---|---|
-| A. measurement | 6 | 0 | 0 |
+| A. measurement | 7 | 0 | 0 |
 | B. silent failure | 6 | 0 | 0 |
 | C. provenance | 3 | 2 | 0 |
 | D. claims | 8 | 0 | 0 |

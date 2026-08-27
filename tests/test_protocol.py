@@ -204,37 +204,65 @@ def test_the_self_edit_gate_trap_is_closed():
                               n_variants=1))
 
 
-def test_ungated_self_improvement_destroys_a_correct_doctrine():
-    """The finding in run_ratchet.py, pinned. An agent endowed with a correct
-    procedure, failing occasionally through execution error, rewrites the
-    procedure and ends below where it started. With the gate it does not."""
-    def run(gated):
-        cfg = TrialConfig(institution="autarky",
-                          quarantine=Q.REGRESSION if gated else Q.NONE,
-                          gate_self_edits=gated, seed=0, rounds=4,
-                          tasks_per_round=3, k_trials=1, n_states=3, n_variants=3,
-                          archetypes=("protocol",), seed_references=True)
-        m = FallibleModel(make_oracle(lambda s, f: False), reliability=0.98, seed=0)
-        return run_trial(cfg, model=m)
-
-    ungated, gated = run(False), run(True)
-    assert ungated["mean_capability"] < gated["mean_capability"]
-    # and the ungated population ends below its own endowed starting point
-    traj = ungated["states"]["A"]["capability_by_round"]
-    assert traj[-1] < traj[0], traj
+def _cap(mode, improve, gated, reliability=0.98, seed=0):
+    cfg = TrialConfig(institution="autarky",
+                      quarantine=Q.REGRESSION if gated else Q.NONE,
+                      gate_self_edits=gated, self_improve=improve,
+                      self_edit_mode=mode, seed=seed, rounds=4, tasks_per_round=3,
+                      k_trials=1, n_states=3, n_variants=3,
+                      archetypes=("protocol",), seed_references=True)
+    m = FallibleModel(make_oracle(lambda s, f: False),
+                      reliability=reliability, seed=seed)
+    return run_trial(cfg, model=m)["mean_capability"]
 
 
-def test_at_perfect_reliability_the_gate_is_worth_nothing():
-    """The control that makes the result meaningful, and the reason the rest of
-    this repository could not have found it: with a perfect solver a competent
-    agent never fails at home, so the destructive branch is unreachable."""
-    def run(gated):
-        cfg = TrialConfig(institution="autarky",
-                          quarantine=Q.REGRESSION if gated else Q.NONE,
-                          gate_self_edits=gated, seed=0, rounds=4,
-                          tasks_per_round=3, k_trials=1, n_states=3, n_variants=3,
-                          archetypes=("protocol",), seed_references=True)
-        m = FallibleModel(make_oracle(lambda s, f: False), reliability=1.0, seed=0)
-        return run_trial(cfg, model=m)["mean_capability"]
+def test_a_replacing_edit_destroys_an_endowed_doctrine():
+    """An agent handed a correct procedure, failing occasionally, overwrites it
+    with the stand-in's content-free playbook and does not recover."""
+    off = _cap("replace", improve=False, gated=False)
+    on = _cap("replace", improve=True, gated=False)
+    assert on < off - 0.15, (on, off)
 
-    assert run(False) == pytest.approx(run(True), abs=1e-9)
+
+def test_an_appending_edit_does_not():
+    """Same loop, same failures, same absence of a gate — the only difference is
+    whether the prior doctrine survives the edit. This is the sensitivity that
+    localises the damage to the operator."""
+    off = _cap("append", improve=False, gated=False)
+    on = _cap("append", improve=True, gated=False)
+    assert on > off - 0.05, (on, off)
+
+
+def test_the_gate_only_matches_never_improving_it_does_not_beat_it():
+    """The correction to an earlier claim of mine. Under `replace` the gated arm
+    equals the never-improve arm; it does not exceed it. So this is not evidence
+    that screening keeps good edits — it is evidence that rejecting every edit
+    beats this loop, which is a different and much weaker statement."""
+    off = _cap("replace", improve=False, gated=False)
+    gated = _cap("replace", improve=True, gated=True)
+    assert gated == pytest.approx(off, abs=1e-9), (gated, off)
+
+
+def test_a_self_edit_is_never_accepted_on_an_empty_suite():
+    """The defect that made the earlier claim wrong: an agent with no regression
+    history had every self-edit waved through, 492 of 492 across the sweep, and
+    that was reported as screening."""
+    from skill_diplomacy.institutions.quarantine import (QuarantineLevel,
+                                                         run_quarantine)
+    accepted = run_quarantine(QuarantineLevel.REGRESSION, [], [],
+                              evaluate=lambda t: True, empty_suite_passes=False)
+    assert accepted.accepted is False
+    assert accepted.vacuous is True
+    waved = run_quarantine(QuarantineLevel.REGRESSION, [], [],
+                           evaluate=lambda t: True, empty_suite_passes=True)
+    assert waved.accepted is True
+    assert waved.vacuous is True, "a vacuous pass must be marked as one"
+
+
+def test_at_perfect_reliability_every_arm_is_identical():
+    """A consistency check rather than a control: improve_from_failure is called
+    zero times in all three arms, so they execute identical code."""
+    vals = {(m, im, g): _cap(m, im, g, reliability=1.0)
+            for m in ("replace", "append")
+            for im, g in ((False, False), (True, False), (True, True))}
+    assert len(set(vals.values())) == 1, vals

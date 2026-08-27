@@ -22,10 +22,11 @@ the argument's work, in the order the argument makes them:
                        relative-gains dial k, showing the monotone fall in one
                        and the interior maximum in the other.
   fig5_ratchet         the result that needs fallible agents to exist at all.
-                       Capability against per-step execution reliability, with
-                       and without a gate on the agent's own edits. Zero effect
-                       at perfect reliability, which is exactly why a
-                       perfect-solver null model cannot see it.
+                       Capability against per-step execution reliability with the
+                       self-improvement loop off and running, under two edit
+                       operators. The damage is the operator, not the loop: the
+                       same loop that costs everything when it overwrites costs
+                       nothing measurable when it appends.
 
 Every figure declares its own n and its own status (harness or live) in the
 subtitle. That is not decoration: the whole credibility structure of this
@@ -205,71 +206,74 @@ def fig4_inequality() -> str:
 
 
 def fig5_ratchet() -> str:
-    """The result that only exists once agents can fail.
+    """The damage is the edit operator, not the loop and not the missing gate.
 
-    Everything else in this repository is measured against a perfect solver, and
-    against a perfect solver this effect is exactly zero — a competent agent
-    never fails at home, so the self-improvement branch never fires and the
-    pathology is unreachable. That is why the figure's leftmost point matters as
-    much as its peak."""
+    Two curves per panel against per-step execution reliability: capability with
+    self-improvement disabled, and with it running unscreened. Left panel, the
+    loop replaces the doctrine wholesale; right panel, it appends. Same failures,
+    same budget, same absence of screening — the only difference is whether the
+    prior doctrine survives the edit."""
     src = RUNS / "ratchet.json"
     if not src.exists():
         return ""
     data = json.loads(src.read_text())
     rows = data["rows"]
+    if not rows or "arm" not in rows[0]:
+        return ""
+    modes = [m for m in data.get("modes", []) if any(r["mode"] == m for r in rows)]
+    if len(modes) < 2:
+        return ""
     rel = sorted({r["reliability"] for r in rows}, reverse=True)
-    get = lambda r, g: next(x for x in rows
-                            if x["reliability"] == r and x["gated"] is g)
-    ungated = [get(r, False)["mean_capability"] for r in rel]
-    gated = [get(r, True)["mean_capability"] for r in rel]
+    get = lambda r, tag, m: next(x for x in rows if x["reliability"] == r
+                                 and x["arm"] == tag and x["mode"] == m)
     seeds = rows[0]["seeds"]
 
-    # x axis runs from perfect down to unreliable, so the reader travels from
-    # the null model's assumption into the regime where it stops holding.
-    xs = list(range(len(rel)))
-    ax = Axes(width=800, height=470, ymin=0.0, ymax=0.40,
-              title="Ungated self-improvement destroys the knowledge it was meant to build",
+    ax = Axes(width=860, height=500, ymin=0.0, ymax=0.40,
+              title="A self-improvement loop that overwrites destroys what it was given",
               subtitle=(f"harness, autarky — no exchange, no adversary, no imports; "
                         f"{data['archetype']} families, {seeds} seeds per point. "
                         "Whatever happens here, the agent does to itself."),
               ylabel="mean capability", xlabel="per-step execution reliability")
     ax.gridlines([0, 0.1, 0.2, 0.3, 0.4])
-    for i, r in enumerate(rel):
-        x = ax.sx_linear(i, 0, len(rel) - 1)
-        ax.add(f'<line x1="{x:.1f}" y1="{ax.y0}" x2="{x:.1f}" y2="{ax.y0+5}" '
-               f'stroke="{MUTED}" stroke-width="1"/>')
-        ax.text(x, ax.y0 + 19, f"{r:g}", size=11, fill=MUTED)
-    for i, r in enumerate(rel):
-        for series, g, colour in ((ungated, False, SERIES[1]), (gated, True, SERIES[0])):
-            lo, hi = get(r, g)["ci"]
-            ax.errorbar(ax.sx_linear(i, 0, len(rel) - 1), lo, hi, colour=colour)
-    line(ax, xs, gated, SERIES[0], xlo=0, xhi=len(rel) - 1)
-    line(ax, xs, ungated, SERIES[1], xlo=0, xhi=len(rel) - 1)
+    mid = (ax.x0 + ax.x1) / 2
+    ax.add(f'<line x1="{mid:.1f}" y1="{ax.y1}" x2="{mid:.1f}" y2="{ax.y0}" '
+           f'stroke="{GRID}" stroke-width="1"/>')
+    panels = ((modes[0], ax.x0 + 26, mid - 30,
+               "replace — the reply is written over the doctrine"),
+              (modes[1], mid + 36, ax.x1 - 22,
+               "append — the prior doctrine survives the edit"))
+    for mode, px0, px1, label in panels:
+        ax.text((px0 + px1) / 2, ax.y1 - 8, label, size=11.5, weight="600")
+        for i, r in enumerate(rel):
+            x = px0 + (px1 - px0) * i / max(1, len(rel) - 1)
+            ax.add(f'<line x1="{x:.1f}" y1="{ax.y0}" x2="{x:.1f}" y2="{ax.y0+5}" '
+                   f'stroke="{MUTED}" stroke-width="1"/>')
+            ax.text(x, ax.y0 + 19, f"{r:g}", size=10, fill=MUTED)
+        for si, (tag, colour) in enumerate((("off", SERIES[0]), ("ungated", SERIES[1]))):
+            ys = [get(r, tag, mode)["mean_capability"] for r in rel]
+            pts = [(px0 + (px1 - px0) * i / max(1, len(rel) - 1), ax.sy(y))
+                   for i, y in enumerate(ys)]
+            d = " ".join(("M" if i == 0 else "L") + f"{a:.1f},{b:.1f}"
+                         for i, (a, b) in enumerate(pts))
+            ax.add(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="2.2"/>')
+            for i, (a, b) in enumerate(pts):
+                lo, hi = get(rel[i], tag, mode)["ci"]
+                ax.errorbar(a, lo, hi, colour=colour, cap=3.5, width=1.2)
+                ax.add(f'<circle cx="{a:.1f}" cy="{b:.1f}" r="3" fill="{colour}"/>')
     ax.frame()
-    ax.legend([("self-edits screened", SERIES[0]),
-               ("self-edits committed unconditionally", SERIES[1])])
-
-    peak = data["headline_reliability"]
-    pi = rel.index(peak)
-    px = ax.sx_linear(pi, 0, len(rel) - 1)
-    ax.add(f'<line x1="{px:.1f}" y1="{ax.sy(get(peak, False)["mean_capability"]):.1f}" '
-           f'x2="{px:.1f}" y2="{ax.sy(get(peak, True)["mean_capability"]):.1f}" '
-           f'stroke="{INK}" stroke-width="1.4" stroke-dasharray="3 2"/>')
-    gap = get(peak, True)["mean_capability"] - get(peak, False)["mean_capability"]
-    ax.text(px + 8, ax.sy((get(peak, True)["mean_capability"]
-                           + get(peak, False)["mean_capability"]) / 2),
-            f"gate buys {gap:+.3f}  (p = 0.002)", size=11, anchor="start", fill=INK)
-
+    ax.legend([("self-improvement disabled", SERIES[0]),
+               ("self-improvement running, unscreened", SERIES[1])])
     ax.text(ax.x0, ax.height - 47,
-            "At perfect reliability the gate is worth exactly nothing: a competent agent never fails, so the "
-            "self-improvement branch never fires.",
+            "Left: at 97% reliability the loop costs 0.287 — every point of capability the agent was endowed with "
+            "(p = 0.0002).",
             size=10.5, anchor="start", fill=MUTED)
     ax.text(ax.x0, ax.height - 34,
-            "Below it, failure triggers a rewrite that replaces a correct procedure with a worse one, and "
-            "capability collapses rather than decays.",
+            "Right: the same loop, the same failures, the same absence of a gate costs 0.037 and is not significant "
+            "(p = 0.11).",
             size=10.5, anchor="start", fill=MUTED)
     ax.text(ax.x0, ax.height - 21,
-            "Screening your own edits is not a tax paid for safety here — it is where the capability comes from.",
+            "A gate that rejects the edit recovers the left panel exactly — by being element-wise identical to "
+            "not running the loop at all.",
             size=10.5, anchor="start", fill=INK)
     return ax.render()
 

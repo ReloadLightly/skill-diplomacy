@@ -106,7 +106,8 @@ class AgentState:
     def improve_from_failure(self, model: ModelClient, task: TaskInstance, *,
                              level: QuarantineLevel = QuarantineLevel.NONE,
                              probes: list[TaskInstance] | None = None,
-                             regression_cap: int = 5) -> str | None:
+                             regression_cap: int = 5,
+                             mode: str = "replace") -> str | None:
         """Ask the model to write/update a doctrine skill, then GATE the edit.
 
         Sprint 2, defect 3.3. v1's docstring promised that 'the edit must not
@@ -121,26 +122,64 @@ class AgentState:
         governance can be reported as a two-term decomposition. Returns the
         committed skill name, or None if the edit was rejected and rolled back.
         """
-        prompt = (
-            f"You failed this {task.family} task:\n\n{task.prompt}\n\n"
-            "Write a concise, reusable playbook (a 'doctrine') that would let you "
-            "solve this WHOLE FAMILY of tasks reliably. Output only the playbook "
-            "body in markdown, starting with a one-line strategy summary."
-        )
+        skill_name = _family_skill(task.family)
+        existing = (self.library.body(skill_name)
+                    if skill_name in self.library.skill_names() else "")
+        if mode == "revise" and existing:
+            prompt = (
+                f"You failed this {task.family} task:\n\n{task.prompt}\n\n"
+                f"Your current doctrine for this family is:\n\n{existing}\n\n"
+                "Revise it so it solves this task as well as everything it already "
+                "handled. Output only the revised playbook body in markdown."
+            )
+        else:
+            prompt = (
+                f"You failed this {task.family} task:\n\n{task.prompt}\n\n"
+                "Write a concise, reusable playbook (a 'doctrine') that would let you "
+                "solve this WHOLE FAMILY of tasks reliably. Output only the playbook "
+                "body in markdown, starting with a one-line strategy summary."
+            )
         resp = model.complete(SYSTEM.format(name=self.name), prompt)
         self.budget.charge(resp.tokens_in, resp.tokens_out, rollouts=1, kind="improve")
-        skill_name = _family_skill(task.family)
 
         before = self.library.snapshot(skill_name)          # transactional edit
+        # WHAT the edit does to the existing doctrine, which turns out to matter
+        # more than whether it is screened. `replace` is what this harness always
+        # did: the new text is written over the old, and the model was never
+        # shown the old (see the prompt above), so the loop is a BLIND FULL-BODY
+        # OVERWRITE triggered by a single failure. No deployed SKILL.md editing
+        # loop works that way, and it is the operator, not the absence of a gate,
+        # that destroys an endowed doctrine.
+        new_body = resp.text.strip()
+        if mode == "append" and existing:
+            new_body = existing.rstrip() + "\n\n" + new_body
         self.library.add_skill(
             skill_name,
             f"Doctrine for {task.family} tasks (home shard of {self.name}).",
-            resp.text.strip(),
+            new_body,
         )
 
+        # A self-edit gate needs evidence. Instrumenting the sweep behind the
+        # ratchet result showed the REGRESSION tier accepting 492 of 492
+        # self-edits vacuously and none on the merits: an agent that has just
+        # failed its home family often has an empty regression store, and an
+        # empty suite passed unconditionally. Failing closed instead does not
+        # fix it -- it rejects every edit, so the gate still never discriminates,
+        # it just errs the other way. Both settings measure self-editing being
+        # off or on rather than screened or unscreened.
+        #
+        # So when there is no history to regress against, escalate to the probes
+        # the caller already supplied. Fresh instances of the family the edit
+        # claims to serve are exactly the evidence a first-time author lacks,
+        # and consulting them is what makes acceptance mean something.
+        regression = self.regression_store[:regression_cap]
+        effective = level
+        if not regression and probes and level is QuarantineLevel.REGRESSION:
+            effective = QuarantineLevel.REGRESSION_PLUS_PROBES
         report = run_quarantine(
-            level, self.regression_store[:regression_cap], probes or [],
-            evaluate=lambda t: self.attempt(model, t, phase="quarantine_self"))
+            effective, regression, probes or [],
+            evaluate=lambda t: self.attempt(model, t, phase="quarantine_self"),
+            empty_suite_passes=False)
 
         if not report.accepted:
             self.library.restore(skill_name, before)

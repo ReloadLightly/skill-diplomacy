@@ -131,14 +131,25 @@ def test_rejected_artifact_is_not_rescreened_every_round():
 
 def test_self_edit_gate_changes_behaviour_when_enabled():
     """A test that fails if the gate is deleted: gating self-edits must charge
-    a self-screen sub-account that is exactly zero when it is off."""
+    a self-screen sub-account that is exactly zero when it is off.
+
+    The third assertion used to be `on["governance_overhead"] >
+    off["governance_overhead"]` — that governance always costs more when you buy
+    more of it. It is now false, and the reason is worth keeping. Once the
+    self-edit gate actually screens (it used to accept anything when the
+    regression store was empty), it rejects the stand-in's content-free
+    playbooks, so nothing enters circulation, so nobody pays to screen imports:
+    import overhead falls to zero and total governance overhead falls with it.
+    Screening self-edits is partly self-financing, because the artifacts it stops
+    are artifacts everyone else would have paid to screen."""
     off = run_trial(_cfg(quarantine=PROBES, gate_self_edits=False, n_states=6,
                          n_variants=2))
     on = run_trial(_cfg(quarantine=PROBES, gate_self_edits=True, n_states=6,
                         n_variants=2))
     assert off["self_screen_overhead"] == 0.0
     assert on["self_screen_overhead"] > 0.0
-    assert on["governance_overhead"] > off["governance_overhead"]
+    assert off["import_screen_overhead"] > 0.0
+    assert on["import_screen_overhead"] < off["import_screen_overhead"]
 
 
 def test_library_snapshot_restore_is_byte_exact():

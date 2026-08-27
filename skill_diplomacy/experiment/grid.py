@@ -130,6 +130,14 @@ class TrialConfig:
     # observed failure fraction concentrates on the defect's true symptom rate
     # as probes are added, so a defect quieter than the rule's tolerance becomes
     # MORE certain to be admitted the more you screen. See run_sufficiency.py.
+    # replace | append | revise — what a self-edit does to the doctrine it
+    # replaces. See state.improve_from_failure; this dominates the gate.
+    self_edit_mode: str = "replace"
+    # The control the ratchet experiment needed and did not have: an arm that
+    # never authors at all. Without it "gated vs ungated" cannot distinguish
+    # "the gate keeps good edits and rejects bad ones" from "the gate rejects
+    # everything, and rejecting everything is better than this loop".
+    self_improve: bool = True
     probe_threshold: float = 0.6
     regression_threshold: float = 1.0
     screen_bankruptcy: str = "refuse"    # refuse | adopt_unscreened — what a
@@ -444,13 +452,14 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                         ran += 1
                         succ += 1 if ok else 0
                         ok_any = ok_any or ok
-                    if not ok_any and st.is_home(fam):
+                    if not ok_any and st.is_home(fam) and cfg.self_improve:
                         probes = (gens[fam].batch(seed=cfg.seed * 977 + rnd * 41 + 5,
                                                   n=cfg.n_probes)
                                   if cfg.gate_self_edits else None)
                         try:
                             st.improve_from_failure(model, task, level=self_gate,
-                                                    probes=probes)
+                                                    probes=probes,
+                                                    mode=cfg.self_edit_mode)
                         except BudgetExceeded:
                             pass
             capability_by_round[name].append(round(succ / ran, 4) if ran else 0.0)
