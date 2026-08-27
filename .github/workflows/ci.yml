@@ -59,3 +59,7 @@ jobs:
       - run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
       - name: Deterministic headline numbers must still reproduce
         run: python -m paper.reproduce --check
+      - name: Every metric must recompute from its own shipped event log
+        run: python -m paper.export_log
+      - name: The committed logs must not have drifted
+        run: git diff --exit-code -- runs/logs/

@@ -7,6 +7,7 @@ drift a test failure rather than something a reader discovers.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import pytest
 
@@ -75,3 +76,38 @@ def test_live_artifacts_are_audited_rather_than_assumed_reproducible():
     problems = reproduce.audit_live_artifacts()
     assert isinstance(problems, list)
     assert all(isinstance(p, str) for p in problems)
+
+
+# ---------------------------------------------------------------------------
+# the event log as a shipped substrate
+# ---------------------------------------------------------------------------
+
+def test_every_metric_recomputes_from_the_shipped_event_log():
+    """README: "every metric is a pure fold over an append-only event log, so
+    results can be recomputed from the log alone". The log used to live in a temp
+    directory that run_trial deletes and was excluded by .gitignore, so nobody
+    could check it. It is committed now, and this folds it back."""
+    import shutil
+    import tempfile
+
+    from paper import export_log
+
+    for name, overrides in export_log.EXPORTS.items():
+        workdir = Path(tempfile.mkdtemp(prefix="sd_test_export_"))
+        try:
+            path, summary = export_log.export_one(name, overrides, workdir)
+            problems = export_log.verify(path, summary)
+            assert not problems, "\n".join(problems)
+        finally:
+            shutil.rmtree(workdir, ignore_errors=True)
+
+
+def test_the_shipped_logs_are_committed_and_readable():
+    from paper import export_log
+    for name in export_log.EXPORTS:
+        path = export_log.OUT / f"{name}.jsonl.gz"
+        assert path.exists(), f"{path} missing — run `python -m paper.export_log`"
+        events = export_log.read_log(path)
+        assert events and all("seq" in e and "type" in e for e in events)
+        assert all("ts" not in e for e in events), (
+            "wall-clock must be stripped or the committed fixture churns")

@@ -436,6 +436,15 @@ each step is one command and produces one artifact you can read):
 
 ## 6. Applying the fix — one step, walked through
 
+> **Status note, added later.** This change has since landed on `main`:
+> `screen_bankruptcy` is a `TrialConfig` field (`grid.py:118`) and the
+> `try/except BudgetExceeded` guards the exchange phase (`grid.py:430`). The
+> patch file described below is **not** in the repository, so the `git apply`
+> instruction in §6 no longer applies — there is nothing left to apply. The
+> second defect this section raises, "Bug B" (`--endowment step` silently
+> behaving as `uniform`), was still open at the time of writing and is now fixed
+> too; see `DEFECTS.md` §B2.
+
 The patch is `sprint3-e4-fix.patch` (I put it in the repo root of the copy I
 worked in; it is also attached). It touches one file, `grid.py`, adding a
 `screen_bankruptcy` config field and a `try/except` around the exchange-phase

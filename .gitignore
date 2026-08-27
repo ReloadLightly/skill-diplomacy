@@ -21,3 +21,12 @@ runs/lex/*transcripts*.json
 !runs/skill_lift.json
 !runs/skill_lift_live.json
 !runs/probe_coverage.json
+
+# The event logs behind the headline deterministic claims ARE committed. The
+# README says every metric is a pure fold over an append-only log and that
+# results can be recomputed from the log alone; a reader cannot check that
+# against a log that is not in the repository. They are gzipped, normalised
+# (wall-clock stripped) and byte-stable, and `python -m paper.export_log`
+# regenerates them AND folds them back to verify the claim holds.
+!runs/logs/
+!runs/logs/*.jsonl.gz
