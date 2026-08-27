@@ -31,6 +31,7 @@ from .base import Generator, TaskInstance
 from .generators.calendar_math import CalendarMathGenerator
 from .generators.lexicon import LexiconGenerator, _GLYPHS
 from .generators.modmath import ModMathGenerator
+from .generators.protocol import ProtocolGenerator
 from .generators.unit_chain import UnitChainGenerator
 
 ARCHETYPES = ["unit_chain", "calendar_math", "modmath"]
@@ -40,6 +41,17 @@ ARCHETYPES = ["unit_chain", "calendar_math", "modmath"]
 # published v1 table for a purely cosmetic reason. Callers ask for it
 # explicitly: make_bank(k, include_lexicon=True).
 LEXICON = "lexicon"
+
+# `protocol` is the second load-bearing archetype, and the one with SLACK.
+# `lexicon` makes capability depend on the library by making the doctrine the
+# answer key, so P(solve | doctrine) = 1 and an institutional comparison over
+# it returns 1 - 1/F by identity. `protocol` carries a procedure instead: the
+# doctrine is necessary but not sufficient, execution can fail, and how often
+# it fails is a property of the model. That is the difference between a result
+# and an arithmetic restatement of the configuration. Opt-in for the same
+# reason as LEXICON -- adding it by default would shift the family count and
+# break bit-for-bit reproduction of the published v1 table.
+PROTOCOL = "protocol"
 
 # disjoint invented-unit pools, one per unit_chain variant
 _SYLL_A = ["fl", "bl", "qu", "dr", "sn", "tv", "ml", "zr", "px", "gr", "vn", "hs"]
@@ -89,6 +101,18 @@ def family_name(archetype: str, variant: int) -> str:
     return archetype if variant == 0 else f"{archetype}{variant + 1}"
 
 
+def _protocol_letters(variant: int) -> str | None:
+    """Disjoint alphabets per protocol variant.
+
+    Splitting the 24-letter pool would shorten each variant's substitution
+    table and change how often a single corrupted entry bites, which is the
+    quantity the screening sweep turns on. So every variant keeps the full
+    alphabet and is separated by its `spec_seed` instead: different weights,
+    different substitution values, different fold rule, same detectability
+    profile. Variants must differ in content, not in difficulty."""
+    return None
+
+
 def _glyph_pool(variant: int) -> list[str]:
     """Disjoint glyph vocabulary per lexicon variant, so each variant is a
     genuinely separate body of knowledge rather than a relabelling."""
@@ -98,7 +122,8 @@ def _glyph_pool(variant: int) -> list[str]:
 
 
 def make_bank(n_variants: int = 1, include_lexicon: bool = False,
-              archetypes: list[str] | tuple[str, ...] | None = None) -> dict:
+              archetypes: list[str] | tuple[str, ...] | None = None,
+              protocol_record_len: int = 4) -> dict:
     """-> {family_name: Generator}, ordered archetype-major so round-robin
     sharding spreads states across archetypes before it duplicates one.
 
@@ -106,10 +131,15 @@ def make_bank(n_variants: int = 1, include_lexicon: bool = False,
     generators/lexicon.py). Left off by default so the published v1 grid
     reproduces bit-for-bit.
 
-    `archetypes` overrides the set entirely. The use that matters is
-    `archetypes=["lexicon"]`, which builds a bank of nothing but load-bearing
-    families — the only configuration in which an institutional comparison is
-    measuring anything (see calibrate.py and runs/skill_lift_live.json)."""
+    `archetypes` overrides the set entirely. The use that matters is a bank of
+    nothing but load-bearing families — the only configuration in which an
+    institutional comparison is measuring anything (see calibrate.py and
+    runs/skill_lift_live.json). Two are available and they are not
+    interchangeable: `["lexicon"]` gives lift pinned at 1.0 by construction and
+    therefore an institutional gap fixed at 1 - 1/F, while `["protocol"]` gives
+    lift strictly below 1, set by how reliably the model executes a six-step
+    procedure. Use `["protocol"]`, or both, for any comparison meant to measure
+    rather than restate. `protocol_record_len` is the difficulty dial."""
     if archetypes is not None:
         archetypes = list(archetypes)
     else:
@@ -121,6 +151,10 @@ def make_bank(n_variants: int = 1, include_lexicon: bool = False,
             if arch == LEXICON:
                 gen = VariantGenerator(
                     LexiconGenerator(lex_seed=v, pool=_glyph_pool(v)), fam)
+            elif arch == PROTOCOL:
+                gen = VariantGenerator(
+                    ProtocolGenerator(spec_seed=v, record_len=protocol_record_len,
+                                      letters=_protocol_letters(v)), fam)
             elif arch == "unit_chain":
                 gen = VariantGenerator(UnitChainGenerator(pool=_unit_pool(v)), fam)
             elif arch == "modmath":

@@ -116,6 +116,36 @@ def _lexicon(prompt: str) -> str:
     return f"Valued via the glyph table.\nANSWER: {total}"
 
 
+_RECORD_RE = re.compile(r"Record: (\S+)")
+
+
+def _protocol(prompt: str) -> str:
+    """Execute the protocol spec found IN THE PROMPT.
+
+    Same channel as `_lexicon`: the doctrine body is injected into the prompt,
+    so the oracle reads the spec exactly as a model would and a corrupted spec
+    corrupts the oracle through the artifact itself, with no poison registry in
+    the loop.
+
+    One asymmetry is worth stating rather than hiding, because it is the whole
+    reason this archetype exists. The oracle executes the procedure PERFECTLY.
+    A live model does not — that is the slack `protocol` was built to introduce
+    — so the scripted and live paths do NOT converge here the way they do on
+    `lexicon`. Scripted `protocol` capability is an upper bound on live
+    capability, and the difference between them is exactly the quantity
+    (execution reliability) that `lexicon` defines away. Read the scripted arm
+    as the null model it is: what the institution does when agents are perfect,
+    tireless solvers."""
+    from ..bank.generators.protocol import apply_protocol, protocol_spec_from_body
+    spec = protocol_spec_from_body(prompt)
+    if not spec:
+        return "No protocol available.\nANSWER: ?"
+    m = _RECORD_RE.search(prompt)
+    if not m:
+        return "No record.\nANSWER: ?"
+    return f"Applied the protocol.\nANSWER: {apply_protocol(spec, m.group(1))}"
+
+
 def make_oracle(registry: PoisonRegistry | Callable[[str, str], bool]) -> Callable[[str, str], str]:
     """Return a `policy(system, prompt) -> str` whose poison behaviour is driven
     by ground truth about what is actually INSTALLED.
@@ -148,11 +178,14 @@ def make_oracle(registry: PoisonRegistry | Callable[[str, str], bool]) -> Callab
             return {"unit_chain": "Not sure.\nANSWER: 0",
                     "calendar_math": "Not sure.\nANSWER: 1900-01-01",
                     "modmath": "Not sure.\nANSWER: 0",
-                    "lexicon": "No lexicon available.\nANSWER: 0"}.get(
+                    "lexicon": "No lexicon available.\nANSWER: 0",
+                    "protocol": "No protocol available.\nANSWER: ?"}.get(
                         arch, "Not sure.\nANSWER: 0")
 
         if arch == "lexicon":
             return _lexicon(prompt)
+        if arch == "protocol":
+            return _protocol(prompt)
         if arch == "unit_chain":
             return _unit_chain(prompt, lookup(name, family))
         if arch == "calendar_math":

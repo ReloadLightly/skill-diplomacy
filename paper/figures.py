@@ -21,6 +21,11 @@ the argument's work, in the order the argument makes them:
   fig4_inequality      the realist result. Mean capability and Gini against the
                        relative-gains dial k, showing the monotone fall in one
                        and the interior maximum in the other.
+  fig5_ratchet         the result that needs fallible agents to exist at all.
+                       Capability against per-step execution reliability, with
+                       and without a gate on the agent's own edits. Zero effect
+                       at perfect reliability, which is exactly why a
+                       perfect-solver null model cannot see it.
 
 Every figure declares its own n and its own status (harness or live) in the
 subtitle. That is not decoration: the whole credibility structure of this
@@ -199,11 +204,82 @@ def fig4_inequality() -> str:
     return ax.render()
 
 
+def fig5_ratchet() -> str:
+    """The result that only exists once agents can fail.
+
+    Everything else in this repository is measured against a perfect solver, and
+    against a perfect solver this effect is exactly zero — a competent agent
+    never fails at home, so the self-improvement branch never fires and the
+    pathology is unreachable. That is why the figure's leftmost point matters as
+    much as its peak."""
+    src = RUNS / "ratchet.json"
+    if not src.exists():
+        return ""
+    data = json.loads(src.read_text())
+    rows = data["rows"]
+    rel = sorted({r["reliability"] for r in rows}, reverse=True)
+    get = lambda r, g: next(x for x in rows
+                            if x["reliability"] == r and x["gated"] is g)
+    ungated = [get(r, False)["mean_capability"] for r in rel]
+    gated = [get(r, True)["mean_capability"] for r in rel]
+    seeds = rows[0]["seeds"]
+
+    # x axis runs from perfect down to unreliable, so the reader travels from
+    # the null model's assumption into the regime where it stops holding.
+    xs = list(range(len(rel)))
+    ax = Axes(width=800, height=470, ymin=0.0, ymax=0.40,
+              title="Ungated self-improvement destroys the knowledge it was meant to build",
+              subtitle=(f"harness, autarky — no exchange, no adversary, no imports; "
+                        f"{data['archetype']} families, {seeds} seeds per point. "
+                        "Whatever happens here, the agent does to itself."),
+              ylabel="mean capability", xlabel="per-step execution reliability")
+    ax.gridlines([0, 0.1, 0.2, 0.3, 0.4])
+    for i, r in enumerate(rel):
+        x = ax.sx_linear(i, 0, len(rel) - 1)
+        ax.add(f'<line x1="{x:.1f}" y1="{ax.y0}" x2="{x:.1f}" y2="{ax.y0+5}" '
+               f'stroke="{MUTED}" stroke-width="1"/>')
+        ax.text(x, ax.y0 + 19, f"{r:g}", size=11, fill=MUTED)
+    for i, r in enumerate(rel):
+        for series, g, colour in ((ungated, False, SERIES[1]), (gated, True, SERIES[0])):
+            lo, hi = get(r, g)["ci"]
+            ax.errorbar(ax.sx_linear(i, 0, len(rel) - 1), lo, hi, colour=colour)
+    line(ax, xs, gated, SERIES[0], xlo=0, xhi=len(rel) - 1)
+    line(ax, xs, ungated, SERIES[1], xlo=0, xhi=len(rel) - 1)
+    ax.frame()
+    ax.legend([("self-edits screened", SERIES[0]),
+               ("self-edits committed unconditionally", SERIES[1])])
+
+    peak = data["headline_reliability"]
+    pi = rel.index(peak)
+    px = ax.sx_linear(pi, 0, len(rel) - 1)
+    ax.add(f'<line x1="{px:.1f}" y1="{ax.sy(get(peak, False)["mean_capability"]):.1f}" '
+           f'x2="{px:.1f}" y2="{ax.sy(get(peak, True)["mean_capability"]):.1f}" '
+           f'stroke="{INK}" stroke-width="1.4" stroke-dasharray="3 2"/>')
+    gap = get(peak, True)["mean_capability"] - get(peak, False)["mean_capability"]
+    ax.text(px + 8, ax.sy((get(peak, True)["mean_capability"]
+                           + get(peak, False)["mean_capability"]) / 2),
+            f"gate buys {gap:+.3f}  (p = 0.002)", size=11, anchor="start", fill=INK)
+
+    ax.text(ax.x0, ax.height - 47,
+            "At perfect reliability the gate is worth exactly nothing: a competent agent never fails, so the "
+            "self-improvement branch never fires.",
+            size=10.5, anchor="start", fill=MUTED)
+    ax.text(ax.x0, ax.height - 34,
+            "Below it, failure triggers a rewrite that replaces a correct procedure with a worse one, and "
+            "capability collapses rather than decays.",
+            size=10.5, anchor="start", fill=MUTED)
+    ax.text(ax.x0, ax.height - 21,
+            "Screening your own edits is not a tax paid for safety here — it is where the capability comes from.",
+            size=10.5, anchor="start", fill=INK)
+    return ax.render()
+
+
 FIGURES = {
     "fig1_skill_lift": fig1_skill_lift,
     "fig2_two_contrasts": fig2_two_contrasts,
     "fig3_screening": fig3_screening,
     "fig4_inequality": fig4_inequality,
+    "fig5_ratchet": fig5_ratchet,
 }
 
 

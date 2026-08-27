@@ -202,6 +202,11 @@ def main() -> None:
     ap.add_argument("--dump-transcripts", action="store_true")
     ap.add_argument("--outdir", type=Path, default=Path("runs"))
     args = ap.parse_args()
+    if getattr(args, "gate_self_edits", False) and args.quarantine == "none":
+        ap.error("--gate-self-edits needs a quarantine tier to gate WITH; "
+                 "pass --quarantine regression or --quarantine probes. "
+                 "With --quarantine none the flag would screen nothing.")
+
 
     base = _base(args)
     seeds = tuple(range(args.seeds))

@@ -364,6 +364,19 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
     })
     _seed_references(cfg, states, gens)
     capability_by_round: dict = {n: [] for n in names}
+    # `gate_self_edits` reuses the import quarantine tier, so asking for the
+    # gate without naming a tier used to yield QuarantineLevel.NONE — a flag
+    # that reads as "self-edits are screened" and screens nothing. Same species
+    # of silent no-op as `--endowment step` without `--great-powers`, and with
+    # sharper consequences: with a fallible agent the ungated path is not merely
+    # unprotected, it is destructive (see `run_ratchet.py`). So it raises.
+    if cfg.gate_self_edits and cfg.quarantine is QuarantineLevel.NONE:
+        raise ValueError(
+            "gate_self_edits=True with quarantine=NONE gates nothing: the "
+            "self-edit gate reuses the import quarantine tier, and NONE accepts "
+            "unconditionally. Choose a tier (REGRESSION or "
+            "REGRESSION_PLUS_PROBES), or set gate_self_edits=False to state "
+            "plainly that self-edits are uncontrolled.")
     self_gate = cfg.quarantine if cfg.gate_self_edits else QuarantineLevel.NONE
 
     for rnd in range(cfg.rounds):

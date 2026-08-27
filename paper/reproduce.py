@@ -190,11 +190,49 @@ def claim_live_statistics() -> dict:
     return out
 
 
+def claim_ratchet() -> dict:
+    """The result that requires fallible agents to exist at all.
+
+    Under autarky — no exchange, no adversary, no imports — an agent endowed
+    with a correct procedure and failing occasionally through execution error
+    rewrites that procedure and ends below where it started. Screening its own
+    edits prevents it. At perfect reliability the gate is worth exactly nothing,
+    which is why a perfect-solver null model cannot see the effect."""
+    from skill_diplomacy.experiment.oracle import make_oracle
+    from skill_diplomacy.harness.fallible import FallibleModel
+
+    def run(gated: bool, reliability: float, seed: int) -> float:
+        cfg = TrialConfig(institution="autarky",
+                          quarantine=(QuarantineLevel.REGRESSION if gated
+                                      else QuarantineLevel.NONE),
+                          gate_self_edits=gated, seed=seed, rounds=4,
+                          tasks_per_round=3, k_trials=1, n_states=3, n_variants=3,
+                          archetypes=("protocol",), seed_references=True)
+        m = FallibleModel(make_oracle(lambda s, f: False),
+                          reliability=reliability, seed=seed)
+        return run_trial(cfg, model=m)["mean_capability"]
+
+    seeds = range(8)
+    out = {}
+    for r in (1.0, 0.98):
+        un = [run(False, r, s) for s in seeds]
+        ga = [run(True, r, s) for s in seeds]
+        tag = str(r).replace(".", "_")
+        out[f"ungated_r{tag}"] = round(sum(un) / len(un), 4)
+        out[f"gated_r{tag}"] = round(sum(ga) / len(ga), 4)
+        out[f"gap_r{tag}"] = round((sum(ga) - sum(un)) / len(un), 4)
+        if r < 1.0:
+            out[f"p_r{tag}"] = permutation_test(un, ga)["p"]
+    out["gate_is_inert_for_a_perfect_solver"] = out["gap_r1_0"] == 0.0
+    return out
+
+
 CLAIMS = {
     "v1_grid": claim_v1_grid,
     "parity_and_scarcity": claim_parity_and_scarcity,
     "monoculture_metric": claim_monoculture_metric,
     "design_floor": claim_design_floor,
+    "ratchet": claim_ratchet,
     "live_statistics": claim_live_statistics,
 }
 

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="470" viewBox="0 0 800 470" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="800" height="470" fill="#ffffff"/>
+<text x="72" y="26" font-size="15.5" font-weight="600" fill="#1a1a1a">Ungated self-improvement destroys the knowledge it was meant to build</text>
+<text x="72" y="44" font-size="11.5" fill="#6b7280">harness, autarky — no exchange, no adversary, no imports; protocol families, 8 seeds per point. Whatever happens here, the agent does to itself.</text>
+<text x="18" y="225.0" font-size="12" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 225.0)">mean capability</text>
+<text x="424.0" y="454" font-size="12" fill="#6b7280" text-anchor="middle">per-step execution reliability</text>
+<line x1="72" y1="394.0" x2="776" y2="394.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="398.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
+<line x1="72" y1="309.5" x2="776" y2="309.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="313.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.1</text>
+<line x1="72" y1="225.0" x2="776" y2="225.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="229.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.2</text>
+<line x1="72" y1="140.5" x2="776" y2="140.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="144.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.3</text>
+<line x1="72" y1="56.0" x2="776" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="60.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.4</text>
+<line x1="72.0" y1="394" x2="72.0" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="72.0" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">1</text>
+<line x1="172.6" y1="394" x2="172.6" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="172.6" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.995</text>
+<line x1="273.1" y1="394" x2="273.1" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="273.1" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.99</text>
+<line x1="373.7" y1="394" x2="373.7" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="373.7" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.98</text>
+<line x1="474.3" y1="394" x2="474.3" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="474.3" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.97</text>
+<line x1="574.9" y1="394" x2="574.9" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="574.9" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.95</text>
+<line x1="675.4" y1="394" x2="675.4" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="675.4" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.92</text>
+<line x1="776.0" y1="394" x2="776.0" y2="399" stroke="#6b7280" stroke-width="1"/>
+<text x="776.0" y="413.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0.9</text>
+<line x1="72.0" y1="112.4" x2="72.0" y2="112.4" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="67.0" y1="112.4" x2="77.0" y2="112.4" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="67.0" y1="112.4" x2="77.0" y2="112.4" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="72.0" y1="112.4" x2="72.0" y2="112.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="67.0" y1="112.4" x2="77.0" y2="112.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="67.0" y1="112.4" x2="77.0" y2="112.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="172.6" y1="300.1" x2="172.6" y2="171.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="167.6" y1="300.1" x2="177.6" y2="300.1" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="167.6" y1="171.0" x2="177.6" y2="171.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="172.6" y1="124.1" x2="172.6" y2="112.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="167.6" y1="124.1" x2="177.6" y2="124.1" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="167.6" y1="112.4" x2="177.6" y2="112.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="273.1" y1="343.1" x2="273.1" y2="233.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="268.1" y1="343.1" x2="278.1" y2="343.1" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="268.1" y1="233.6" x2="278.1" y2="233.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="273.1" y1="198.4" x2="273.1" y2="128.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="268.1" y1="198.4" x2="278.1" y2="198.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="268.1" y1="128.0" x2="278.1" y2="128.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="373.7" y1="390.1" x2="373.7" y2="327.5" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="368.7" y1="390.1" x2="378.7" y2="390.1" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="368.7" y1="327.5" x2="378.7" y2="327.5" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="373.7" y1="253.2" x2="373.7" y2="151.5" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="368.7" y1="253.2" x2="378.7" y2="253.2" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="368.7" y1="151.5" x2="378.7" y2="151.5" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="474.3" y1="394.0" x2="474.3" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="469.3" y1="394.0" x2="479.3" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="469.3" y1="394.0" x2="479.3" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="474.3" y1="304.0" x2="474.3" y2="190.6" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="469.3" y1="304.0" x2="479.3" y2="304.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="469.3" y1="190.6" x2="479.3" y2="190.6" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="574.9" y1="394.0" x2="574.9" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="569.9" y1="394.0" x2="579.9" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="569.9" y1="394.0" x2="579.9" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="574.9" y1="315.8" x2="574.9" y2="210.2" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="569.9" y1="315.8" x2="579.9" y2="315.8" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="569.9" y1="210.2" x2="579.9" y2="210.2" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="675.4" y1="394.0" x2="675.4" y2="366.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="670.4" y1="394.0" x2="680.4" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="670.4" y1="366.6" x2="680.4" y2="366.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="675.4" y1="335.4" x2="675.4" y2="265.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="670.4" y1="335.4" x2="680.4" y2="335.4" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="670.4" y1="265.0" x2="680.4" y2="265.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="776.0" y1="394.0" x2="776.0" y2="366.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="771.0" y1="394.0" x2="781.0" y2="394.0" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="771.0" y1="366.6" x2="781.0" y2="366.6" stroke="#D55E00" stroke-width="1.6"/>
+<line x1="776.0" y1="351.0" x2="776.0" y2="284.5" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="771.0" y1="351.0" x2="781.0" y2="351.0" stroke="#0072B2" stroke-width="1.6"/>
+<line x1="771.0" y1="284.5" x2="781.0" y2="284.5" stroke="#0072B2" stroke-width="1.6"/>
+<path d="M72.0,112.4 L172.6,116.2 L273.1,155.4 L373.7,190.6 L474.3,241.5 L574.9,261.0 L675.4,296.2 L776.0,315.8" fill="none" stroke="#0072B2" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="72.0" cy="112.4" r="3.1" fill="#0072B2"/>
+<circle cx="172.6" cy="116.2" r="3.1" fill="#0072B2"/>
+<circle cx="273.1" cy="155.4" r="3.1" fill="#0072B2"/>
+<circle cx="373.7" cy="190.6" r="3.1" fill="#0072B2"/>
+<circle cx="474.3" cy="241.5" r="3.1" fill="#0072B2"/>
+<circle cx="574.9" cy="261.0" r="3.1" fill="#0072B2"/>
+<circle cx="675.4" cy="296.2" r="3.1" fill="#0072B2"/>
+<circle cx="776.0" cy="315.8" r="3.1" fill="#0072B2"/>
+<path d="M72.0,112.4 L172.6,233.6 L273.1,288.4 L373.7,362.7 L474.3,394.0 L574.9,394.0 L675.4,382.3 L776.0,382.3" fill="none" stroke="#D55E00" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="72.0" cy="112.4" r="3.1" fill="#D55E00"/>
+<circle cx="172.6" cy="233.6" r="3.1" fill="#D55E00"/>
+<circle cx="273.1" cy="288.4" r="3.1" fill="#D55E00"/>
+<circle cx="373.7" cy="362.7" r="3.1" fill="#D55E00"/>
+<circle cx="474.3" cy="394.0" r="3.1" fill="#D55E00"/>
+<circle cx="574.9" cy="394.0" r="3.1" fill="#D55E00"/>
+<circle cx="675.4" cy="382.3" r="3.1" fill="#D55E00"/>
+<circle cx="776.0" cy="382.3" r="3.1" fill="#D55E00"/>
+<line x1="72" y1="394" x2="776" y2="394" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="72.0" y="25.0" width="11" height="11" rx="2" fill="#0072B2"/>
+<text x="88.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">self-edits screened</text>
+<rect x="228.8" y="25.0" width="11" height="11" rx="2" fill="#D55E00"/>
+<text x="244.8" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">self-edits committed unconditionally</text>
+<line x1="373.7" y1="362.7" x2="373.7" y2="190.6" stroke="#1a1a1a" stroke-width="1.4" stroke-dasharray="3 2"/>
+<text x="381.7" y="276.7" font-size="11" text-anchor="start" fill="#1a1a1a" font-weight="normal">gate buys +0.204  (p = 0.002)</text>
+<text x="72.0" y="423.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">At perfect reliability the gate is worth exactly nothing: a competent agent never fails, so the self-improvement branch never fires.</text>
+<text x="72.0" y="436.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">Below it, failure triggers a rewrite that replaces a correct procedure with a worse one, and capability collapses rather than decays.</text>
+<text x="72.0" y="449.0" font-size="10.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">Screening your own edits is not a tax paid for safety here — it is where the capability comes from.</text>
+</svg>

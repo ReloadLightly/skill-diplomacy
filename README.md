@@ -46,15 +46,29 @@ a strict rule of refusing any transfer that helps a rival more than yourself.
 **Quarantine** — what you *test* before you keep what you were given. Three tiers:
 nothing; a regression suite drawn from tasks you already solve; or fresh probes
 drawn from the part of the task space the incoming skill claims to cover. Every
-test costs tokens, charged to the importer.
+test costs tokens, charged to the importer. The same gate can be pointed at an
+agent's *own* edits, and that turns out to matter more than pointing it at
+imports.
 
-A fourth quantity governs whether any of the three can be measured at all.
+Two quantities govern whether any of the three can be measured at all.
 **Skill lift** is the difference a doctrine makes: the pass rate of an agent
 holding it minus the pass rate of the same agent with an empty library. Where
 lift is zero the task is solvable cold, the artifact is decorative, and no
 institution can move the outcome. Measuring lift before running anything
 institutional is the single cheapest guard against measuring nothing, and it is
 the guard this repository did not have (`calibrate.py`).
+
+Lift is necessary and not sufficient, which took longer to learn. A family can
+have lift +1.00 and still measure nothing, if it has it *by construction*: the
+`lexicon` doctrine is the answer key, so holding it guarantees the answer, and
+an institutional comparison over such a family returns 1 − 1/F whatever model
+you run — an identity the experimenter chose, reproducible to four decimals by
+the scripted stand-in. What is needed as well is **slack**: the doctrine must be
+necessary but not sufficient, so the outcome depends on what the agent does with
+it. The `protocol` archetype carries a procedure rather than an answer, and
+`harness/fallible.py` makes per-step execution reliability an explicit swept
+parameter, so the perfect-solver assumption becomes testable instead of
+structural. See `DEFECTS.md` §A4 and §B5.
 
 In biological terms, which is how we now think this is best read: import is
 **horizontal gene transfer**, a defective skill is a **parasite**, quarantine is an
@@ -94,6 +108,7 @@ beside every p-value; `skill_diplomacy/metrics/stats.py` computes it.
 | Parity, not abundance, is the boundary condition | harness | Under a **uniform** endowment the relative-gains dial is a two-level step whatever the family count — 3 families or 12, the sweep takes exactly two capability values. Under a **graded** endowment it traces a curve at 3 families already (3 levels), more finely at 12 (5) and at the full v2 scale (7). So exact parity is where the mechanism is inert, and scarcity sets the *resolution* at which the dial can be read rather than switching the effect on. This supersedes an earlier claim that "with three task families every arrangement returns identical capability", which does not reproduce: at three families autarky is 0.333, clubs 0.556, free trade 1.000. The corrected version is what Powell (1991) predicts, since relative-gains sensitivity is endogenous to asymmetry. |
 | Inequality is non-monotone | harness | As export restriction tightens, mean capability falls monotonically, but *inequality* peaks at moderate restriction (Gini ≈ 0.68) and falls again under strict autarky — strict refusal produces not a hierarchy but a flat, uniformly poor population. Robust across five endowment shapes; vanishes only under exact symmetry. |
 | Austerity admits contagion | harness | Under a binding budget, agents that cannot afford to screen and adopt anyway take on 228 defective skills, 198 of them acquired second-hand through honest intermediaries. When budgets are generous the same policy never triggers. Screening is a luxury good. |
+| **Ungated self-improvement destroys the knowledge it was meant to build** | harness | **The strongest result here, and the only statistically significant one.** Under *autarky* — no exchange, no adversary, no imports — an agent endowed with a correct procedure and failing occasionally through execution error rewrites that procedure into something worse, and capability collapses rather than decays. Screening its own edits prevents it: at 98% per-step reliability the gate buys **+0.204 capability (0.037 → 0.241, p = 0.0019 exact, 8 seeds/arm)**. At *perfect* reliability the gate is worth exactly **+0.000** — a competent agent never fails, so the destructive branch is unreachable — which is why a perfect-solver null model cannot see this and why the rest of this repository could not have found it. It also reframes the price of governance: against imports, screening trades capability for safety; against your own edits it *is* where the capability comes from. `python run_ratchet.py`. |
 | Governance is costlier live | live | On a real model, screening consumed 53% of the budget versus 20% under the scripted stand-in — the price of governance is substantially steeper than the harness implies. |
 
 ## What is not yet true
@@ -128,13 +143,14 @@ are new and which are re-derivations in a new substrate.
 ## Running it
 
 ```bash
-pytest -q                                # 119 tests, no API key needed
+pytest -q                                # 136 tests, no API key needed
 python -m paper.reproduce --check        # every deterministic number, vs a locked manifest
 python -m paper.figures                  # -> paper/fig/*.svg
 python calibrate.py --lexicon            # skill lift per family (start here)
 python calibrate.py --live --lexicon     # ...against a real model: 1/4 families survive
 python run_lex.py free_trade 0           # live institution run over load-bearing families
 python run_probes.py --seeds 24          # fixed vs re-drawn probe coverage (scripted)
+python run_ratchet.py                    # self-edit gating vs execution reliability
 python run_v1.py                         # the institution × quarantine grid (deterministic)
 python run_v2.py --sweep k               # the export-restriction dial → capability and inequality
 python run_v2.py --sweep budget          # governance under a budget that actually binds
@@ -167,8 +183,13 @@ only way transitive propagation can be measured at all.
 
 ```
 skill_diplomacy/
-  harness/      event log, token budget with a screening sub-account, model clients
-  bank/         self-verifying task generators; variants dial for scarcity
+  harness/      event log, token budget with a screening sub-account, model
+                clients, and `fallible.py` — execution reliability as a dial, so
+                "agents are perfect solvers" is a parameter, not a fixture
+  bank/         self-verifying task generators; variants dial for scarcity.
+                Two load-bearing archetypes and they are not interchangeable:
+                `lexicon` carries an answer key (lift pinned at 1), `protocol`
+                carries a procedure (lift set by the model, and fallible)
   skills/       Agent-Skills-format libraries, provenance, transactional edits
   institutions/ exchange institutions, export policies, quarantine tiers
   metrics/      capability, Gini, pass^k, adoption graph, contamination spread

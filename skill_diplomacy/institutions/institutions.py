@@ -98,35 +98,59 @@ POISON_TEXT = (
 def is_poisoned_body(body: str) -> bool:
     """Content-derived ground truth. Survives export → import → re-export.
 
-    Two contaminant classes are recognised, one per archetype family: a bogus
-    shortcut RULE appended to a procedural playbook (unit_chain), and an
-    ERRATUM silently overriding one row of a reference table (lexicon). Both
-    share the defining property — locally plausible, correct on shallow cases,
-    wrong off-shard — which is what makes home-shard screening blind to them."""
+    Contaminant classes, one per archetype family: a bogus shortcut RULE
+    appended to a procedural playbook (unit_chain), an ERRATUM silently
+    overriding one row of a reference table (lexicon), and a CORRECTION NOTICE
+    superseding either the weight cycle or one substitution entry of a protocol
+    spec (protocol). All share the defining property — locally plausible,
+    correct on the cases the holder already checks, wrong elsewhere — which is
+    what makes home-shard screening blind to them.
+
+    The protocol pair is deliberately two defects rather than one, because they
+    sit an order of magnitude apart in DETECTABILITY: a corrupted weight is
+    wrong on ~89% of instances, a corrupted substitution entry on ~16%. That
+    span is the axis the screening experiment is actually about, and having
+    both turns one contrast into a sweep."""
     from ..bank.generators.lexicon import LEXICON_POISON_MARKER
+    from ..bank.generators.protocol import (PROTOCOL_POISON_MARKER,
+                                            SUBSTITUTION_POISON_MARKER)
     text = body or ""
-    return POISON_MARKER in text or LEXICON_POISON_MARKER in text
+    return (POISON_MARKER in text or LEXICON_POISON_MARKER in text
+            or PROTOCOL_POISON_MARKER in text
+            or SUBSTITUTION_POISON_MARKER in text)
 
 
 def is_poisoned_artifact(artifact: dict) -> bool:
     return bool(artifact.get("_poisoned")) or is_poisoned_body(artifact.get("body", ""))
 
 
-def poison_artifact(artifact: dict) -> dict:
+def poison_artifact(artifact: dict,
+                    protocol_poison_mode: str = "substitution") -> dict:
     """Corrupt an artifact in the way its own kind is plausibly corrupted.
 
     A procedural playbook gets a bogus shortcut rule; a reference table gets an
-    erratum silently overriding one row. Dispatch is on CONTENT, not on family
-    name, so an artifact is poisoned correctly however it was labelled and
-    wherever it is intercepted. Idempotent: re-exports do not stack markers."""
+    erratum silently overriding one row; a protocol spec gets a correction
+    notice. Dispatch is on CONTENT, not on family name, so an artifact is
+    poisoned correctly however it was labelled and wherever it is intercepted.
+    Idempotent: re-exports do not stack markers.
+
+    `protocol_poison_mode` selects how detectable the protocol defect is —
+    `substitution` (~16% of instances wrong, the hard case) by default, or
+    `weight` (~89%, the loud one). Defaulting to the hard case is deliberate:
+    the easy one is caught by any screen that runs at all, so a contamination
+    experiment that only ever used it would report that screening works and
+    learn nothing about how much of it to buy."""
     if is_poisoned_artifact(artifact):
         return dict(artifact)
     from ..bank.generators.lexicon import poison_lexicon_body
+    from ..bank.generators.protocol import poison_protocol_body
 
     body = artifact["body"]
     poisoned = dict(artifact)
     if "| glyph | value |" in body:
         poisoned["body"] = poison_lexicon_body(body)
+    elif "Positional weight cycle:" in body:
+        poisoned["body"] = poison_protocol_body(body, mode=protocol_poison_mode)
     else:
         poisoned["body"] = body.rstrip() + POISON_TEXT
     poisoned["_poisoned"] = True  # convenience flag; the BODY is the ground truth

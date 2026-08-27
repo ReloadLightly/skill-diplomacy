@@ -39,6 +39,16 @@
     "k_levels_3_families_zipf": 3,
     "scarcity_sets_resolution_not_existence": true
   },
+  "ratchet": {
+    "gap_r0_98": 0.2037,
+    "gap_r1_0": 0.0,
+    "gate_is_inert_for_a_perfect_solver": true,
+    "gated_r0_98": 0.2407,
+    "gated_r1_0": 0.3333,
+    "p_r0_98": 0.0019,
+    "ungated_r0_98": 0.037,
+    "ungated_r1_0": 0.3333
+  },
   "v1_grid": {
     "adversarial_capability": 0.86,
     "adversarial_probes_capability": 0.78,

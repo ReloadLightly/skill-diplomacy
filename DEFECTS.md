@@ -68,6 +68,67 @@ p = 5e-05. See §D1 for the corrected claim.
 Tests: `tests/test_stats.py::test_a_fixed_probe_suite_is_all_or_nothing` and
 four others.
 
+### A4. The load-bearing family's doctrine IS the answer key · **closed**
+
+`lexicon`'s `reference_body()` emits the complete glyph→value table and the task
+asks only for a weighted sum over it, so P(solve | doctrine) = 1 and
+P(solve | no doctrine) ≈ 0 **by construction**, and mean capability reduces to
+|library ∩ families| / F.
+
+That made the repository's one positive live claim an arithmetic identity.
+`run_lex.py` pins autarky at exactly 1/3 and free trade at exactly 1, so the
+reported gap of +0.667 is 1 − 1/F — a quantity the experimenter chose. Re-running
+that configuration against the *scripted* oracle reproduces the published "live"
+numbers to four decimals, and `diff`ing the committed live artifacts across seeds
+shows differences only in `seed` and `spent_tokens`. The zero variance the README
+presented as strength is the signature of a deterministic quantity. `LETTER.md`
+§6 condemns exactly this move in print: "a null model that defines capability as
+a function of the library will confirm that capability is a function of the
+library."
+
+Repair: `bank/generators/protocol.py`, a second load-bearing archetype whose
+doctrine carries a **procedure** rather than an answer. The doctrine is
+necessary but not sufficient — a six-step computation over ~9 digits still has
+to be executed — so P(solve | doctrine) is strictly below 1 and is a property of
+the *model*. `record_len` is a difficulty dial, and the poison comes at two
+detectabilities an order of magnitude apart (a corrupted weight is wrong on 89%
+of instances, a corrupted substitution entry on 16%), which turns the screening
+question from one contrast into a sweep over how rare a defect's symptoms are.
+
+The identity does not disappear on its own — it is a property of a perfect
+solver, and at reliability 1.0 `protocol` also returns 1 − 1/F. What changes is
+that the assumption is now a **parameter** (§B5) rather than a fixture, so the
+institutional gap becomes a curve instead of a constant.
+
+### B5. The perfect-solver assumption was unfalsifiable · **closed**
+
+Nothing in the harness could make an agent fail at something it held a correct
+doctrine for. The scripted oracle solves perfectly; a live model over `lexicon`
+also solves perfectly, because the doctrine is the answer. So there was no
+configuration in which model behaviour selected the outcome, and no way to ask
+what the institution does as a function of agent competence.
+
+Repair: `harness/fallible.py`. `FallibleModel` wraps any policy and fails at a
+controlled per-step rate, so an instance requiring n steps is answered correctly
+with probability `reliability ** n`. Failures are plausible perturbations of the
+right answer, not malformed output, or quarantine would be catching a tell
+rather than a defect. The coin is keyed on (seed, system, prompt) by SHA-256
+rather than call order, so a trial reproduces exactly even though adoption
+decisions change how many calls precede any given one.
+
+The scripted oracle is now the reliability = 1 endpoint of a sweep rather than
+the only available agent.
+
+### B6. `gate_self_edits=True` gated nothing unless a quarantine tier was set · **closed**
+
+`grid.py` computed `self_gate = cfg.quarantine if cfg.gate_self_edits else NONE`,
+so `gate_self_edits=True` with `quarantine=NONE` — a combination that reads as
+"self-edits are screened" — accepted every edit unconditionally. Same species of
+silent no-op as `--endowment step` without `--great-powers` (§B2), and with
+sharper consequences, because the ungated path turned out to be actively
+destructive (§F1). Now raises, and `run_v2.py` rejects the flag combination with
+a message naming the fix.
+
 ---
 
 ## B. Silent-failure defects — the harness hid something a result depended on
@@ -244,11 +305,16 @@ classified SATURATED against a 0.80 threshold. The diagnostic the paper offers
 as a contribution is being applied below the n at which it can distinguish its
 own three regimes. Needs a live re-run at higher n.
 
-### E3. One load-bearing archetype · **won't fix here**
+### E3. One load-bearing archetype · **closed**
 
-`lexicon` is the only family with non-zero lift, and its variants share solution
-logic. Every live institutional result rests on one archetype. `README.md`
-already declares this.
+`lexicon` was the only family with non-zero lift, and its variants share
+solution logic, so every live institutional result rested on one archetype —
+and, as §A4 shows, on the one whose lift is pinned at 1 by construction.
+`protocol` is a second, and is deliberately not a variant of the first: it
+carries procedural rather than declarative knowledge, its lift is strictly
+below 1 and set by the model, and it degrades along a different axis (steps
+executed, not glyphs known). Live measurement of its lift still needs an API
+key; the archetype and its calibration path do not.
 
 ### E4. The saboteur is scripted, not adaptive · **won't fix here**
 
@@ -258,15 +324,76 @@ standard this departure has to answer to.
 
 ---
 
+## F. Findings this repair produced
+
+Not defects. Recorded here because they were discovered by fixing the ones
+above, and because the first of them is the strongest result the repository
+currently holds.
+
+### F1. Ungated self-improvement destroys the knowledge it was meant to build
+
+An agent that holds a correct procedure and fails a task anyway is in a
+situation the self-improvement loop cannot read. The loop's trigger is failure;
+its inference is "I lack a doctrine for this family"; its action is to write
+one. But a competent agent's failure is often an execution slip rather than a
+knowledge gap, and the doctrine it then writes is worse than the one it already
+had. Ungated, the edit is committed, the correct procedure is overwritten
+(verified on disk: the endowed protocol spec is gone, replaced by the generic
+playbook), every subsequent attempt fails, and that triggers further
+"improvement". Capability does not decay — it collapses and does not recover.
+
+Measured under **autarky**: no exchange, no adversary, no imports. Whatever
+happens, the agent does to itself. Eight seeds per point, `protocol` families.
+
+| per-step reliability | self-edits ungated | self-edits screened | gate buys |
+|---|---|---|---|
+| 1.000 | 0.333 | 0.333 | **+0.000** |
+| 0.995 | 0.190 | 0.329 | +0.139 |
+| 0.990 | 0.125 | 0.282 | +0.157 |
+| **0.980** | **0.037** | **0.241** | **+0.204** (p = 0.0019, exact) |
+| 0.970 | 0.000 | 0.180 | +0.180 |
+| 0.950 | 0.000 | 0.157 | +0.157 |
+| 0.900 | 0.014 | 0.093 | +0.079 |
+
+Three things make this worth reporting.
+
+**It is the first statistically significant result in the repository.** p =
+0.0019 by exact permutation at eight seeds per arm, against a design floor of
+0.0002. Every other contrast here is either deterministic or underpowered.
+
+**The effect is exactly zero for a perfect solver**, and that is the control
+that makes it meaningful rather than a caveat that weakens it. A competent
+agent never fails at home, so the destructive branch is unreachable, and no
+amount of running the existing harness could have found this. The finding is
+downstream of §B5.
+
+**It reframes the price of governance.** Screening is argued for on
+contamination grounds — check what you import, someone may have poisoned it.
+This is a different and more basic argument, and it holds with no adversary
+anywhere in the system: screening your *own* edits is what makes
+self-improvement monotone. Against imports, governance trades capability for
+safety. Against self-edits it does not trade at all — it is where the capability
+comes from.
+
+The effect is also non-monotone in reliability, peaking near 0.98: the gate
+matters only when failures are frequent enough to trigger a rewrite and rare
+enough that the doctrine being overwritten is still worth having. That shape
+echoes the interior maximum in the inequality result, and has the same kind of
+mechanism behind it.
+
+Reproduce: `python run_ratchet.py`. Figure: `paper/fig/fig5_ratchet.svg`.
+
+---
+
 ## Summary
 
 | | closed | open | won't fix |
 |---|---|---|---|
-| A. measurement | 3 | 0 | 0 |
-| B. silent failure | 4 | 0 | 0 |
+| A. measurement | 4 | 0 | 0 |
+| B. silent failure | 6 | 0 | 0 |
 | C. provenance | 2 | 2 | 0 |
 | D. claims | 5 | 0 | 0 |
-| E. design | 0 | 0 | 4 |
+| E. design | 0 | 0 | 3 |
 
 Every defect in the **code** is closed, and every **claim** defect is closed —
 `README.md`, `LETTER.md` and `CRITIQUE.md` no longer state a number that does not
