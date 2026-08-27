@@ -271,8 +271,19 @@ showed in Avida that parasites are *generative*, raising host complexity — a
 result our purely destructive saboteur does not reproduce and should be measured
 against.
 
-Everything reported here is reproducible from a public repository with no API key
-for the scripted results and one command for the live ones.
+**Data and code availability.** Everything reported here is in
+`github.com/ReloadLightly/skill-diplomacy` (MIT; `runs/` under CC BY 4.0).
+`python -m paper.reproduce --check` regenerates every deterministic number and
+fails on drift; `python -m paper.figures` regenerates every figure; the event
+logs the metrics fold over are committed under `runs/logs/`, and
+`python -m paper.export_log` folds them back to verify that each reported metric
+is recoverable from its log alone. The scripted results need no API key and no
+dependency beyond the standard library. The live results require an
+authenticated `claude` CLI and cannot be re-derived from the repository: the
+artifacts backing them predate the provenance block, so the model snapshot that
+produced them is not recorded. That limitation is stated rather than worked
+around, and the repository's defect register (`DEFECTS.md`) tracks it as open.
+A citation file and a tagged, archived commit accompany the submission version.
 
 ## Limitations
 

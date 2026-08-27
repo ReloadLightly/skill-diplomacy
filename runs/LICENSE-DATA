@@ -1,0 +1,11 @@
+The contents of runs/ — result summaries, event logs and sweep artifacts — are
+released under the Creative Commons Attribution 4.0 International licence
+(CC BY 4.0), separately from the MIT licence covering the code.
+
+https://creativecommons.org/licenses/by/4.0/
+
+They are machine-generated outputs of the code in this repository. The
+deterministic ones regenerate exactly from `python -m paper.reproduce` and
+`python -m paper.export_log`; the live ones (runs/h1/, runs/lex/) cannot be
+regenerated, because they predate the provenance block that would record which
+model produced them. See DEFECTS.md §C1.

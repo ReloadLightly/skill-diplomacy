@@ -175,8 +175,29 @@ adversarial `SKILL.md` artifacts across four frameworks and five models, 11.6–
 bypass rates. **Ling, Zhong & Huang** (2026), arXiv:2602.08004 — analysis of 40,285
 public skills. Industry base rates (Snyk "ToxicSkills": 36.8% of 3,984 scanned
 skills flawed; the CSA's SKILL.md supply-chain advisory; OWASP Agentic Skills Top
-10). **Xu & Yan** (2026), arXiv:2602.12430 — the nearest formal neighbour, a
-four-tier *permission* model, unpriced and unevaluated.
+10). **Xu & Yan** (2026), arXiv:2602.12430, *Agent Skills for Large Language
+Models: Architecture, Acquisition, Security, and the Path Forward* — the nearest
+formal neighbour on governance. Verified against the paper on 27 Aug 2026, and
+the description here needed tightening: it is a **survey**, not a dedicated
+formal paper, and its governance contribution sits in its security section. That
+contribution is real and is our closest competitor — a *Skill Trust and Lifecycle
+Governance Framework* with four verification gates (static analysis, LLM semantic
+classification, behavioural sandboxing, permission-manifest validation) and four
+trust tiers (Unvetted/Sandboxed, Community-Reviewed, Organization-Vetted,
+Vendor-Certified) granting graduated permissions, mapped onto Agent Skills'
+progressive-disclosure levels. **Relation:** the tiers are *proposed*, not
+priced or evaluated — no budget, no measured cost, no capability consequence —
+which is precisely the gap we occupy. Our tiers are the same idea charged in the
+same currency as the improvement they protect. Differentiate by name and by
+mechanism, not by claiming the territory is empty.
+
+The same survey carries base rates worth citing directly rather than through
+industry reports: Liu et al. analysed 31,132 skills and found 26.1% carrying at
+least one vulnerability (13.3% data exfiltration, 11.8% privilege escalation),
+with script-bundling skills 2.12× more likely to be vulnerable; a companion study
+identified 157 confirmed malicious skills in 98,380. Those numbers are the
+strongest available answer to "is a defective-artifact channel a real threat or a
+modelling convenience?" — and it is the former.
 
 Foundational security lineage: Greshake et al. (2023) indirect prompt injection;
 **Gu et al., "Agent Smith"** (ICML 2024) — exponential contagion through pairwise

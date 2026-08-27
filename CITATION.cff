@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: >-
+  Skill Diplomacy: exchange institutions, screening and contamination in
+  populations of skill-trading language-model agents
+message: >-
+  If you use this software or its results, please cite it. The repository is the
+  data-availability statement for the accompanying manuscript: every
+  deterministic number regenerates from a single command, and the event logs the
+  metrics fold over are committed under runs/logs/.
+type: software
+authors:
+  - family-names: "Löchli"
+    given-names: "Roland"
+    email: roland.loechli@googlemail.com
+repository-code: "https://github.com/ReloadLightly/skill-diplomacy"
+license: MIT
+keywords:
+  - artificial life
+  - cultural evolution
+  - self-improving agents
+  - agent skills
+  - artificial immune systems
+  - horizontal transfer
+abstract: >-
+  A harness for studying populations of language-model agents that exchange
+  Agent-Skills artifacts. Three dials are manipulated — which agents may copy
+  from whom, which are willing to give, and what an importer tests before
+  keeping what it received — with screening charged to the same token budget as
+  self-improvement, so the cost of governance is commensurable with the
+  capability it protects. Deterministic results run on the standard library
+  alone; live results require a model.

@@ -21,6 +21,13 @@ runs/lex/*transcripts*.json
 !runs/skill_lift.json
 !runs/skill_lift_live.json
 !runs/probe_coverage.json
+# The sweep artifacts the figures are built from. figures.py claims to
+# regenerate 'from committed artifacts'; without these a clean clone
+# silently produces fewer figures than the paper cites, with no error.
+!runs/v2_k.json
+!runs/v2_budget.json
+!runs/ratchet.json
+!runs/LICENSE-DATA
 
 # The event logs behind the headline deterministic claims ARE committed. The
 # README says every metric is a pure fold over an append-only log and that

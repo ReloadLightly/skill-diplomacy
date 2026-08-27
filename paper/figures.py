@@ -274,12 +274,72 @@ def fig5_ratchet() -> str:
     return ax.render()
 
 
+def fig6_governance_coverage() -> str:
+    """Governance under a binding budget is paid in COVERAGE, not competence.
+
+    The published version of this experiment reported "capability 0.627" for the
+    unscreened arm at a 160k budget. That number was the product of two
+    different things: attempts a state could not pay for were scored as wrong
+    answers and left in the denominator. Separated, the unscreened arm answers
+    100% of what it attempts and can afford 63% of them — it did not get worse
+    at the task, it ran out of money. The screened arm affords nothing at all."""
+    src = RUNS / "v2_budget.json"
+    if not src.exists():
+        return ""
+    rows = json.loads(src.read_text())
+    budgets = sorted({r["budget"] for r in rows})
+    get = lambda b, q: next((r for r in rows
+                             if r["budget"] == b and r["quarantine"] == q), None)
+    if any(get(b, "none") is None or "attempt_coverage" not in get(b, "none")
+           for b in budgets):
+        return ""      # artifact predates coverage reporting
+
+    xs = list(range(len(budgets)))
+    ax = Axes(width=820, height=470, ymin=0.0, ymax=1.1,
+              title="Under a binding budget, screening costs coverage — not competence",
+              subtitle=("harness, free trade, 15 states x 30 families, zipf endowment. "
+                        "Solid: accuracy on attempts that ran. Dashed: share of "
+                        "scheduled attempts the state could afford."),
+              ylabel="rate", xlabel="token budget")
+    ax.gridlines([0, 0.25, 0.5, 0.75, 1.0])
+    for i, b in enumerate(budgets):
+        x = ax.sx_linear(i, 0, len(budgets) - 1)
+        ax.add(f'<line x1="{x:.1f}" y1="{ax.y0}" x2="{x:.1f}" y2="{ax.y0+5}" '
+               f'stroke="{MUTED}" stroke-width="1"/>')
+        ax.text(x, ax.y0 + 19, f"{b//1000}k", size=11, fill=MUTED)
+
+    for si, (q, label) in enumerate((("none", "no screening"),
+                                     ("regression_plus_probes", "probes"))):
+        colour = SERIES[si]
+        cap = [get(b, q)["mean_capability"] for b in budgets]
+        cov = [get(b, q)["attempt_coverage"] for b in budgets]
+        line(ax, xs, cap, colour, xlo=0, xhi=len(budgets) - 1)
+        pts = [(ax.sx_linear(x, 0, len(budgets) - 1), ax.sy(y)) for x, y in zip(xs, cov)]
+        d = " ".join(("M" if i == 0 else "L") + f"{px:.1f},{py:.1f}"
+                     for i, (px, py) in enumerate(pts))
+        ax.add(f'<path d="{d}" fill="none" stroke="{colour}" stroke-width="2" '
+               f'stroke-dasharray="6 4"/>')
+    ax.frame()
+    ax.legend([("accuracy / coverage, unscreened", SERIES[0]),
+               ("accuracy / coverage, probes", SERIES[1])])
+    ax.text(ax.x0, ax.height - 34,
+            "At 160k the unscreened arm answers everything it attempts and affords 63% of them; "
+            "the screened arm affords none.",
+            size=10.5, anchor="start", fill=MUTED)
+    ax.text(ax.x0, ax.height - 21,
+            "Reported as one number these read as \u201ccapability 0.627\u201d \u2014 a state that could not pay to try, "
+            "recorded as one that could not solve.",
+            size=10.5, anchor="start", fill=INK)
+    return ax.render()
+
+
 FIGURES = {
     "fig1_skill_lift": fig1_skill_lift,
     "fig2_two_contrasts": fig2_two_contrasts,
     "fig3_screening": fig3_screening,
     "fig4_inequality": fig4_inequality,
     "fig5_ratchet": fig5_ratchet,
+    "fig6_governance_coverage": fig6_governance_coverage,
 }
 
 

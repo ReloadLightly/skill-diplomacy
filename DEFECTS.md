@@ -100,6 +100,75 @@ solver, and at reliability 1.0 `protocol` also returns 1 − 1/F. What changes i
 that the assumption is now a **parameter** (§B5) rather than a fixture, so the
 institutional gap becomes a curve instead of a constant.
 
+### A5. Unaffordable attempts were scored as wrong answers · **closed**
+
+`grid.py`'s eval loop caught `BudgetExceeded` as `ok = False` and still counted
+the attempt in the denominator, so under a binding budget `capability` was
+silently the product of two different quantities: how well a state answers, and
+how much of its schedule it could pay for. The budget sweep exists precisely to
+study budgets that bind, so the defect sat in the middle of the experiment it
+would corrupt — the same shape as scoring a transport failure as cognition
+(§B1), and the same repair.
+
+Separated, the published austerity numbers read differently and better. At a
+160k budget the unscreened arm was reported as **capability 0.627**. It is
+actually **capability 1.000 at coverage 0.627**: it answered everything it
+attempted and could afford 63% of its attempts. It did not get worse at the
+task; it ran out of money. The screened arm at the same budget affords nothing
+at all.
+
+So the price of governance under scarcity is paid in **coverage, not
+competence** — a claim with the right units, and one the conflated number could
+not express. `attempt_coverage` and `budget_bound` are now reported per state
+and per population. Non-binding budgets are unaffected: coverage is 1.0 and
+every previously published number is unchanged, which `paper.reproduce --check`
+confirms.
+
+### D6. Two standard-deviation conventions, one in the paper and one in the code · **closed**
+
+`LETTER.md` reported "autarky 0.889 ± 0.111 and free trade 0.963 ± 0.064" —
+sample sd (n−1), computed by hand. `grid.py`'s `_mean_std` divided by n,
+emitting 0.091 and 0.052 into every `capability_std` column. A replicator finds
+that discrepancy immediately and cannot explain it. `_mean_std` now uses n−1,
+which is also the right convention given seeds are replicates.
+
+### D7. The README's Gini figure was not the one its own command produces · **closed**
+
+`README.md` said inequality "peaks at moderate restriction (Gini ≈ 0.68)". The
+committed sweep gives **0.6701 at k=4** (0.6693 at k=3). The 0.68 came from
+`CRITIQUE.md`'s zipf-15 and step-3-great-power rows — endowment shapes with no
+committed artifact, which the README did not identify as the source. Now stated
+as 0.670 for the published endowment with the 0.60–0.69 range across shapes.
+
+### D8. One citation described a survey as a dedicated formal paper · **closed**
+
+`RELATEDWORK.md` described arXiv:2602.12430 (Xu & Yan) as "the nearest formal
+neighbour, a four-tier *permission* model, unpriced and unevaluated."
+
+Checked against the source. An audit had reported this as a misattribution —
+that the paper "proposes no permission model" — and that report was **wrong**;
+taking it at face value would have removed an accurate and load-bearing
+citation. The paper does propose a four-tier permission model: a Skill Trust and
+Lifecycle Governance Framework with four verification gates and four trust tiers
+granting graduated permissions. What needed correcting was smaller and
+different: it is a *survey*, and the framework is one section of it. The entry
+now says so, names the framework, and keeps the "unpriced and unevaluated"
+judgement, which is accurate and is exactly the gap this project occupies.
+
+The survey also carries base rates worth citing directly — 26.1% of 31,132
+skills carrying a vulnerability, 157 confirmed malicious skills in 98,380 —
+which answer "is a defective-artifact channel a real threat or a modelling
+convenience?" better than anything currently in the manuscript.
+
+### C4. No citation metadata or data-availability statement · **closed**
+
+`LETTER.md` claimed reproducibility "from a public repository" without naming
+it. Added `CITATION.cff`, a CC BY 4.0 licence for `runs/` (the MIT licence
+covers code only), and a data-availability paragraph that names the repository,
+the three regeneration commands, and — rather than eliding it — the fact that
+the live artifacts cannot be re-derived because they predate the provenance
+block.
+
 ### B5. The perfect-solver assumption was unfalsifiable · **closed**
 
 Nothing in the harness could make an agent fail at something it held a correct
@@ -389,10 +458,10 @@ Reproduce: `python run_ratchet.py`. Figure: `paper/fig/fig5_ratchet.svg`.
 
 | | closed | open | won't fix |
 |---|---|---|---|
-| A. measurement | 4 | 0 | 0 |
+| A. measurement | 5 | 0 | 0 |
 | B. silent failure | 6 | 0 | 0 |
-| C. provenance | 2 | 2 | 0 |
-| D. claims | 5 | 0 | 0 |
+| C. provenance | 3 | 2 | 0 |
+| D. claims | 8 | 0 | 0 |
 | E. design | 0 | 0 | 3 |
 
 Every defect in the **code** is closed, and every **claim** defect is closed —

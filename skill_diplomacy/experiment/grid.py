@@ -364,6 +364,11 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
     })
     _seed_references(cfg, states, gens)
     capability_by_round: dict = {n: [] for n in names}
+    # Affordability, kept separate from ability. Under a non-binding budget this
+    # is 1.0 everywhere and capability is unchanged; where the budget binds, the
+    # two must be read together -- a state at capability 1.0 and coverage 0.1
+    # answered everything it could pay for and could pay for almost nothing.
+    coverage_by_round: dict = {n: [] for n in names}
     # `gate_self_edits` reuses the import quarantine tier, so asking for the
     # gate without naming a tier used to yield QuarantineLevel.NONE — a flag
     # that reads as "self-edits are screened" and screens nothing. Same species
@@ -382,18 +387,30 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
     for rnd in range(cfg.rounds):
         # ---- eval + self-improve phase (all families, k trials each) --------
         for name, st in states.items():
-            succ = tot = 0
+            succ = ran = scheduled = 0
             for fam in families:
                 for task in gens[fam].batch(
                         seed=_eval_seed(cfg, rnd, name, fam, names, families),
                         n=cfg.tasks_per_round):
                     ok_any = False
                     for _ in range(cfg.k_trials):
+                        scheduled += 1
                         try:
                             ok = st.attempt(model, task)
                         except BudgetExceeded:
-                            ok = False
-                        tot += 1
+                            # An attempt that never ran is not a wrong answer.
+                            # It used to be scored as one and still counted in
+                            # the denominator, so under a binding budget
+                            # `capability` silently became ability x
+                            # affordability -- and the austerity experiment,
+                            # which exists precisely to study binding budgets,
+                            # read a state that could not afford to try as a
+                            # state that could not solve. Same defect as scoring
+                            # a transport failure as cognition (see
+                            # harness/cli_model.py); both are now counted rather
+                            # than folded into the outcome.
+                            continue
+                        ran += 1
                         succ += 1 if ok else 0
                         ok_any = ok_any or ok
                     if not ok_any and st.is_home(fam):
@@ -405,7 +422,9 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                                                     probes=probes)
                         except BudgetExceeded:
                             pass
-            capability_by_round[name].append(round(succ / tot, 4) if tot else 0.0)
+            capability_by_round[name].append(round(succ / ran, 4) if ran else 0.0)
+            coverage_by_round[name].append(
+                round(ran / scheduled, 4) if scheduled else 0.0)
 
         # ---- exchange phase (institution-gated, policy-gated, quarantined) --
         ctx = ExchangeContext()
@@ -433,7 +452,8 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                                        exporter=states[exporter_name],
                                        skill=skill, rnd=rnd)
 
-    return _summarise(cfg, log, states, capability_by_round, names, gens, model)
+    return _summarise(cfg, log, states, capability_by_round, names, gens,
+                      model, coverage_by_round)
 
 
 def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
@@ -518,7 +538,7 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
 
 
 def _summarise(cfg, log, states, capability_by_round, names, gens,
-               model=None) -> dict:
+               model=None, coverage_by_round=None) -> dict:
     events = log.read()
     per_state = {}
     for n, st in states.items():
@@ -526,6 +546,11 @@ def _summarise(cfg, log, states, capability_by_round, names, gens,
         per_state[n] = {
             "final_capability": traj[-1] if traj else 0.0,
             "capability_by_round": traj,
+            "attempt_coverage": (
+                round(coverage_by_round[n][-1], 4)
+                if coverage_by_round and coverage_by_round[n] else 1.0),
+            "attempt_coverage_by_round": (
+                coverage_by_round[n] if coverage_by_round else []),
             "pass^k": round(pass_k(trials_by_task(events, n), cfg.k_trials), 3),
             "library": st.library.skill_names(),
             "budget": st.budget.snapshot(),
@@ -555,6 +580,12 @@ def _summarise(cfg, log, states, capability_by_round, names, gens,
         # attributed to a model, a date or a commit, and the harness/live status
         # label every claim in the README depends on rests on memory.
         "provenance": run_provenance(model, dataclasses.asdict(cfg)),
+        # Population-level affordability. Below 1.0 the budget bound, and
+        # `mean_capability` describes only the attempts that could be paid for.
+        "attempt_coverage": round(
+            sum(per_state[n]["attempt_coverage"] for n in names) / len(names), 4)
+        if names else 1.0,
+        "budget_bound": any(per_state[n]["attempt_coverage"] < 1.0 for n in names),
         "endowment": cfg.endowment,   # the flag actually passed, not a guess
         "n_great_powers": cfg.n_great_powers,
         "great_power_weight": cfg.great_power_weight,
@@ -606,11 +637,22 @@ def run_grid(institutions=None, levels=None, seeds=DEFAULT_SEEDS, model=None,
 
 
 def _mean_std(xs):
+    """Mean and SAMPLE standard deviation (n-1).
+
+    This used to divide by n. Seeds here are replicates drawn to estimate a
+    population, not the population itself, so n-1 is the right convention — and
+    more concretely, the +/- figures published in LETTER.md were computed by
+    hand under n-1 (0.111 and 0.064) while every `capability_std` the code
+    emitted used n (0.091 and 0.052). Two conventions, one of them in the paper
+    and the other in the artifacts, is a discrepancy a replicator finds
+    immediately and cannot explain."""
     n = len(xs)
     if n == 0:
         return 0.0, 0.0
     mean = sum(xs) / n
-    var = sum((x - mean) ** 2 for x in xs) / n
+    if n == 1:
+        return mean, 0.0
+    var = sum((x - mean) ** 2 for x in xs) / (n - 1)
     return mean, var ** 0.5
 
 

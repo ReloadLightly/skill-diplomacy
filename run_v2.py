@@ -85,6 +85,14 @@ def _fold(tag, trials) -> dict:
         "arm": tag,
         "seeds": n,
         "mean_capability": round(sum(t["mean_capability"] for t in trials) / n, 4),
+        # Ability and affordability, reported separately. Attempts a state could
+        # not pay for used to be scored as wrong answers and left in the
+        # denominator, so under a binding budget `mean_capability` was silently
+        # the product of the two -- and this sweep exists to study exactly the
+        # budgets where that happens.
+        "attempt_coverage": round(
+            sum(t.get("attempt_coverage", 1.0) for t in trials) / n, 4),
+        "budget_bound": any(t.get("budget_bound") for t in trials),
         "capability_gini": round(sum(t["capability_gini"] for t in trials) / n, 4),
         "governance_overhead": round(sum(t["governance_overhead"] for t in trials) / n, 4),
         "import_screen_overhead": round(sum(t["import_screen_overhead"] for t in trials) / n, 4),
