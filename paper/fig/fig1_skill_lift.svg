@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="430" viewBox="0 0 780 430" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="780" height="430" fill="#ffffff"/>
+<text x="72" y="26" font-size="15.5" font-weight="600" fill="#1a1a1a">Skill lift is measured at an n that cannot resolve its own verdicts</text>
+<text x="72" y="44" font-size="11.5" fill="#6b7280">live, Claude Haiku 4.5, n=6 instances per family; bars are Wilson 95% intervals</text>
+<text x="18" y="205.0" font-size="12" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 205.0)">P(solve)</text>
+<text x="414.0" y="414" font-size="12" fill="#6b7280" text-anchor="middle">task family</text>
+<line x1="72" y1="354.0" x2="756" y2="354.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="358.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
+<line x1="72" y1="279.5" x2="756" y2="279.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="283.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.25</text>
+<line x1="72" y1="205.0" x2="756" y2="205.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="209.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.5</text>
+<line x1="72" y1="130.5" x2="756" y2="130.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="134.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.75</text>
+<line x1="72" y1="56.0" x2="756" y2="56.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="60.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">1</text>
+<line x1="72" y1="115.6" x2="756" y2="115.6" stroke="#6b7280" stroke-width="1.2" stroke-dasharray="4 3"/>
+<text x="752.0" y="109.6" font-size="10.5" text-anchor="end" fill="#6b7280" font-weight="normal">saturation threshold used by calibrate.py (floor ≥ 0.80)</text>
+<rect x="99.5" y="56.0" width="54.0" height="298.0" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="126.5" y1="172.3" x2="126.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="121.5" y1="172.3" x2="131.5" y2="172.3" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="121.5" y1="56.0" x2="131.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="157.5" y="56.0" width="54.0" height="298.0" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="184.5" y1="172.3" x2="184.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="179.5" y1="172.3" x2="189.5" y2="172.3" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="179.5" y1="56.0" x2="189.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="157.5" y="374.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">unit_chain</text>
+<text x="157.5" y="392.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">lift +0.00</text>
+<rect x="270.5" y="56.0" width="54.0" height="298.0" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="297.5" y1="172.3" x2="297.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="292.5" y1="172.3" x2="302.5" y2="172.3" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="292.5" y1="56.0" x2="302.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="328.5" y="56.0" width="54.0" height="298.0" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="355.5" y1="172.3" x2="355.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="350.5" y1="172.3" x2="360.5" y2="172.3" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="350.5" y1="56.0" x2="360.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="328.5" y="374.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">calendar_math</text>
+<text x="328.5" y="392.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">lift +0.00</text>
+<rect x="441.5" y="105.8" width="54.0" height="248.2" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="468.5" y1="223.9" x2="468.5" y2="65.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="463.5" y1="223.9" x2="473.5" y2="223.9" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="463.5" y1="65.0" x2="473.5" y2="65.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="499.5" y="155.2" width="54.0" height="198.8" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="526.5" y1="264.6" x2="526.5" y2="84.8" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="521.5" y1="264.6" x2="531.5" y2="264.6" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="521.5" y1="84.8" x2="531.5" y2="84.8" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="499.5" y="374.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">modmath</text>
+<text x="499.5" y="392.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">lift -0.17</text>
+<rect x="612.5" y="354.0" width="54.0" height="0.0" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="639.5" y1="354.0" x2="639.5" y2="237.7" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="634.5" y1="354.0" x2="644.5" y2="354.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="634.5" y1="237.7" x2="644.5" y2="237.7" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="670.5" y="56.0" width="54.0" height="298.0" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="697.5" y1="172.3" x2="697.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="692.5" y1="172.3" x2="702.5" y2="172.3" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="692.5" y1="56.0" x2="702.5" y2="56.0" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="670.5" y="374.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">lexicon</text>
+<text x="670.5" y="392.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">lift +1.00</text>
+<rect x="72.0" y="25.0" width="11" height="11" rx="2" fill="#0072B2"/>
+<text x="88.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">empty library (floor)</text>
+<rect x="243.2" y="25.0" width="11" height="11" rx="2" fill="#D55E00"/>
+<text x="259.2" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">reference skill installed</text>
+<line x1="72" y1="354" x2="756" y2="354" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="72.0" y="396.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">Every interval spans ≥0.39. unit_chain&#x27;s 6/6 floor is consistent with a true rate of 0.61,</text>
+<text x="72.0" y="409.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">and modmath&#x27;s −0.17 lift is not distinguishable from zero.</text>
+</svg>

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skill-diplomacy"
+version = "0.4.0"
+description = "Exchange institutions, screening and contamination in populations of skill-trading LLM agents"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+# Deliberately empty. Every deterministic result in this repository -- which is
+# every result that does not need a model -- runs on the standard library alone.
+# That is a property worth keeping and worth stating: a reviewer can reproduce
+# the scripted arms with a python interpreter and nothing else.
+dependencies = []
+
+[project.optional-dependencies]
+# The live arms. `anthropic` is only needed by harness.model.AnthropicModel;
+# harness.cli_model.CLIModel needs an authenticated `claude` CLI instead and no
+# python package at all.
+live = ["anthropic>=0.40"]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+include = ["skill_diplomacy*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

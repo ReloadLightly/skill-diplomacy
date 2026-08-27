@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="450" viewBox="0 0 780 450" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="780" height="450" fill="#ffffff"/>
+<text x="72" y="26" font-size="15.5" font-weight="600" fill="#1a1a1a">Capability falls monotonically in k; inequality peaks in the interior</text>
+<text x="72" y="44" font-size="11.5" fill="#6b7280">harness (scripted null model); k is the relative-gains sensitivity of the export policy, swept over 13 values</text>
+<text x="18" y="215.0" font-size="12" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 215.0)">capability / Gini</text>
+<text x="414.0" y="434" font-size="12" fill="#6b7280" text-anchor="middle">relative-gains sensitivity k</text>
+<line x1="72" y1="374.0" x2="756" y2="374.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="378.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
+<line x1="72" y1="318.7" x2="756" y2="318.7" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="322.7" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.2</text>
+<line x1="72" y1="263.4" x2="756" y2="263.4" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="267.4" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.4</text>
+<line x1="72" y1="208.1" x2="756" y2="208.1" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="212.1" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.6</text>
+<line x1="72.0" y1="374" x2="72.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="72.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">0</text>
+<line x1="129.0" y1="374" x2="129.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="129.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">1</text>
+<line x1="186.0" y1="374" x2="186.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="186.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">2</text>
+<line x1="243.0" y1="374" x2="243.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="243.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">3</text>
+<line x1="300.0" y1="374" x2="300.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="300.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">4</text>
+<line x1="357.0" y1="374" x2="357.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="357.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">5</text>
+<line x1="414.0" y1="374" x2="414.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="414.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">6</text>
+<line x1="471.0" y1="374" x2="471.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="471.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">7</text>
+<line x1="528.0" y1="374" x2="528.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="528.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">8</text>
+<line x1="585.0" y1="374" x2="585.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="585.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">9</text>
+<line x1="642.0" y1="374" x2="642.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="642.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">10</text>
+<line x1="699.0" y1="374" x2="699.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="699.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">11</text>
+<line x1="756.0" y1="374" x2="756.0" y2="379" stroke="#6b7280" stroke-width="1"/>
+<text x="756.0" y="393.0" font-size="11" text-anchor="middle" fill="#6b7280" font-weight="normal">12</text>
+<path d="M72.0,97.5 L129.0,115.3 L186.0,240.1 L243.0,308.9 L300.0,325.5 L357.0,341.4 L414.0,341.4 L471.0,341.4 L528.0,341.4 L585.0,354.9 L642.0,354.9 L699.0,354.9 L756.0,354.9" fill="none" stroke="#0072B2" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="72.0" cy="97.5" r="3.1" fill="#0072B2"/>
+<circle cx="129.0" cy="115.3" r="3.1" fill="#0072B2"/>
+<circle cx="186.0" cy="240.1" r="3.1" fill="#0072B2"/>
+<circle cx="243.0" cy="308.9" r="3.1" fill="#0072B2"/>
+<circle cx="300.0" cy="325.5" r="3.1" fill="#0072B2"/>
+<circle cx="357.0" cy="341.4" r="3.1" fill="#0072B2"/>
+<circle cx="414.0" cy="341.4" r="3.1" fill="#0072B2"/>
+<circle cx="471.0" cy="341.4" r="3.1" fill="#0072B2"/>
+<circle cx="528.0" cy="341.4" r="3.1" fill="#0072B2"/>
+<circle cx="585.0" cy="354.9" r="3.1" fill="#0072B2"/>
+<circle cx="642.0" cy="354.9" r="3.1" fill="#0072B2"/>
+<circle cx="699.0" cy="354.9" r="3.1" fill="#0072B2"/>
+<circle cx="756.0" cy="354.9" r="3.1" fill="#0072B2"/>
+<path d="M72.0,374.0 L129.0,356.2 L186.0,236.7 L243.0,188.9 L300.0,188.7 L357.0,206.3 L414.0,206.3 L471.0,206.3 L528.0,206.3 L585.0,270.5 L642.0,270.5 L699.0,270.5 L756.0,270.5" fill="none" stroke="#D55E00" stroke-width="2.2" stroke-linejoin="round"/>
+<circle cx="72.0" cy="374.0" r="3.1" fill="#D55E00"/>
+<circle cx="129.0" cy="356.2" r="3.1" fill="#D55E00"/>
+<circle cx="186.0" cy="236.7" r="3.1" fill="#D55E00"/>
+<circle cx="243.0" cy="188.9" r="3.1" fill="#D55E00"/>
+<circle cx="300.0" cy="188.7" r="3.1" fill="#D55E00"/>
+<circle cx="357.0" cy="206.3" r="3.1" fill="#D55E00"/>
+<circle cx="414.0" cy="206.3" r="3.1" fill="#D55E00"/>
+<circle cx="471.0" cy="206.3" r="3.1" fill="#D55E00"/>
+<circle cx="528.0" cy="206.3" r="3.1" fill="#D55E00"/>
+<circle cx="585.0" cy="270.5" r="3.1" fill="#D55E00"/>
+<circle cx="642.0" cy="270.5" r="3.1" fill="#D55E00"/>
+<circle cx="699.0" cy="270.5" r="3.1" fill="#D55E00"/>
+<circle cx="756.0" cy="270.5" r="3.1" fill="#D55E00"/>
+<circle cx="300.0" cy="188.7" r="6.5" fill="none" stroke="#1a1a1a" stroke-width="1.4"/>
+<text x="300.0" y="174.7" font-size="10.5" text-anchor="middle" fill="#1a1a1a" font-weight="normal">interior maximum: Gini 0.67 at k=4</text>
+<line x1="72" y1="374" x2="756" y2="374" stroke="#1a1a1a" stroke-width="1.2"/>
+<rect x="72.0" y="25.0" width="11" height="11" rx="2" fill="#0072B2"/>
+<text x="88.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">mean capability</text>
+<rect x="200.0" y="25.0" width="11" height="11" rx="2" fill="#D55E00"/>
+<text x="216.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">capability Gini</text>
+<text x="72.0" y="429.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">Strict refusal produces not a hierarchy but a flat, uniformly poor population — the rich stop trading too.</text>
+</svg>

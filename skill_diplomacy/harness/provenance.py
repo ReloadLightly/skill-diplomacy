@@ -22,6 +22,7 @@ degrades to a recorded reason rather than an exception.
 from __future__ import annotations
 
 import datetime as dt
+from enum import Enum
 import platform
 import subprocess
 from pathlib import Path
@@ -70,6 +71,27 @@ def describe_model(model) -> dict:
     return {"client": type(model).__name__}
 
 
+def _jsonable(value):
+    """Coerce a config value into something `json.dumps` accepts.
+
+    `TrialConfig` holds a `QuarantineLevel` enum and tuples, so echoing the
+    config verbatim made every driver that writes its results to disk fail at
+    serialisation. Provenance that breaks the run it documents is worse than no
+    provenance, so this is total: anything unrecognised degrades to `repr`
+    rather than raising."""
+    if isinstance(value, Enum):
+        return value.value
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    if isinstance(value, dict):
+        return {str(k): _jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return [_jsonable(v) for v in value]
+    if isinstance(value, Path):
+        return str(value)
+    return repr(value)
+
+
 def run_provenance(model, config: dict | None = None) -> dict:
     """The block stamped into every trial summary.
 
@@ -82,7 +104,7 @@ def run_provenance(model, config: dict | None = None) -> dict:
         "timestamp_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "git": git_state(),
         "python": platform.python_version(),
-        "model": m,
+        "model": _jsonable(m),
         "live": bool(m.get("live", type(model).__name__ != "ScriptedModel")),
-        "config": dict(config or {}),
+        "config": _jsonable(dict(config or {})),
     }

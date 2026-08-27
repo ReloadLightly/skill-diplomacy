@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="780" height="450" viewBox="0 0 780 450" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="780" height="450" fill="#ffffff"/>
+<text x="72" y="26" font-size="15.5" font-weight="600" fill="#1a1a1a">The institutional effect appears only where the skill carries information</text>
+<text x="72" y="44" font-size="11.5" fill="#6b7280">live, Claude Haiku 4.5, 3 seeds per arm; bars are seeded percentile bootstrap 95% intervals</text>
+<text x="18" y="215.0" font-size="12" fill="#6b7280" text-anchor="middle" transform="rotate(-90 18 215.0)">mean capability</text>
+<line x1="72" y1="374.0" x2="756" y2="374.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="378.0" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0</text>
+<line x1="72" y1="304.9" x2="756" y2="304.9" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="308.9" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.25</text>
+<line x1="72" y1="235.7" x2="756" y2="235.7" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="239.7" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.5</text>
+<line x1="72" y1="166.6" x2="756" y2="166.6" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="170.6" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">0.75</text>
+<line x1="72" y1="97.5" x2="756" y2="97.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="62.0" y="101.5" font-size="11" text-anchor="end" fill="#6b7280" font-weight="normal">1</text>
+<rect x="185.0" y="128.2" width="54.0" height="245.8" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="212.0" y1="158.9" x2="212.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="207.0" y1="158.9" x2="217.0" y2="158.9" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="207.0" y1="97.5" x2="217.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="243.0" y="107.7" width="54.0" height="266.3" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="270.0" y1="128.2" x2="270.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="265.0" y1="128.2" x2="275.0" y2="128.2" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="265.0" y1="97.5" x2="275.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="243.0" y="394.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">saturated families (unit_chain, calendar, modmath)</text>
+<text x="243.0" y="412.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">Δ = +0.074   p = 0.70 (exact)</text>
+<rect x="527.0" y="281.8" width="54.0" height="92.2" fill="#0072B2" rx="2" opacity="0.92"/>
+<line x1="554.0" y1="281.8" x2="554.0" y2="281.8" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="549.0" y1="281.8" x2="559.0" y2="281.8" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="549.0" y1="281.8" x2="559.0" y2="281.8" stroke="#1a1a1a" stroke-width="1.6"/>
+<rect x="585.0" y="97.5" width="54.0" height="276.5" fill="#D55E00" rx="2" opacity="0.92"/>
+<line x1="612.0" y1="97.5" x2="612.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="607.0" y1="97.5" x2="617.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<line x1="607.0" y1="97.5" x2="617.0" y2="97.5" stroke="#1a1a1a" stroke-width="1.6"/>
+<text x="585.0" y="394.0" font-size="12" text-anchor="middle" fill="#1a1a1a" font-weight="normal">load-bearing families (lexicon x3)</text>
+<text x="585.0" y="412.0" font-size="10.5" text-anchor="middle" fill="#6b7280" font-weight="normal">Δ = +0.667   p = 0.10 (exact)</text>
+<rect x="72.0" y="25.0" width="11" height="11" rx="2" fill="#0072B2"/>
+<text x="88.0" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">autarky</text>
+<rect x="142.4" y="25.0" width="11" height="11" rx="2" fill="#D55E00"/>
+<text x="158.4" y="34.0" font-size="11.5" text-anchor="start" fill="#1a1a1a" font-weight="normal">free trade</text>
+<line x1="72" y1="374" x2="756" y2="374" stroke="#1a1a1a" stroke-width="1.2"/>
+<text x="72.0" y="416.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">With 3 seeds per arm an exact permutation test cannot return p below 0.10 (C(6,3) = 20 arrangements),</text>
+<text x="72.0" y="429.0" font-size="10.5" text-anchor="start" fill="#6b7280" font-weight="normal">so the right-hand contrast is at the design&#x27;s floor despite separating perfectly. Five seeds per arm would reach 0.008.</text>
+</svg>

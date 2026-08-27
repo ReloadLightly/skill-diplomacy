@@ -1,0 +1,56 @@
+{
+  "design_floor": {
+    "min_p_at_3_seeds_per_arm": 0.1,
+    "min_p_at_4_seeds_per_arm": 0.0286,
+    "min_p_at_5_seeds_per_arm": 0.0079,
+    "min_p_at_8_seeds_per_arm": 0.0002
+  },
+  "live_statistics": {
+    "lift_calendar_math_floor_ci_width": 0.3903,
+    "lift_lexicon_floor_ci_width": 0.3903,
+    "lift_modmath_floor_ci_width": 0.5334,
+    "lift_unit_chain_floor_ci_width": 0.3903,
+    "load_bearing_autarky_mean": 0.3333,
+    "load_bearing_difference": 0.6667,
+    "load_bearing_free_trade_mean": 1.0,
+    "load_bearing_p_exact": 0.1,
+    "load_bearing_seeds_per_arm": 3,
+    "saturated_autarky_mean": 0.8889,
+    "saturated_difference": 0.0741,
+    "saturated_free_trade_mean": 0.963,
+    "saturated_p_exact": 0.7,
+    "saturated_seeds_per_arm": 3
+  },
+  "monoculture_metric": {
+    "lexicon_distinct_bodies": 3,
+    "lexicon_n_families": 3,
+    "scripted_distinct_bodies": 1,
+    "scripted_library_similarity": 1.0
+  },
+  "parity_and_scarcity": {
+    "autarky_capability_at_3_families": 0.3333,
+    "clubs_capability_at_3_families": 0.5556,
+    "dial_is_inert_under_parity": true,
+    "free_trade_capability_at_3_families": 1.0,
+    "institutions_identical_at_3_families": false,
+    "k_levels_12_families_uniform": 2,
+    "k_levels_12_families_zipf": 5,
+    "k_levels_3_families_uniform": 2,
+    "k_levels_3_families_zipf": 3,
+    "scarcity_sets_resolution_not_existence": true
+  },
+  "v1_grid": {
+    "adversarial_capability": 0.86,
+    "adversarial_probes_capability": 0.78,
+    "adversarial_probes_overhead": 0.204,
+    "autarky_capability": 0.33,
+    "clubs_capability": 0.56,
+    "clubs_gini": 0.13,
+    "free_trade_capability": 1.0,
+    "free_trade_probes_overhead": 0.18,
+    "poison_admitted_probes": 0,
+    "poison_admitted_regression": 6,
+    "poison_offered_probes": 6,
+    "poison_offered_regression": 6
+  }
+}
