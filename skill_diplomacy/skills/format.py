@@ -52,6 +52,37 @@ def _parse_skill_md(text: str) -> tuple[SkillMeta, str]:
     return meta, body
 
 
+def artifact_hash(name: str, body: str, scripts: dict[str, str] | None = None) -> str:
+    """Content identity of a skill: name + body + bundled scripts, and nothing
+    else. Deliberately excludes frontmatter (version, provenance, description)
+    so that the SAME doctrine has the SAME hash in every library that holds it,
+    however many hands it passed through. Every consumer of this value --
+    monoculture counts, the contamination denylist, unique-contaminant counts,
+    lineage joins -- wants content identity; none wants file identity."""
+    h = hashlib.sha256()
+    h.update(name.encode())
+    h.update(body.strip().encode())
+    for fname, code in sorted((scripts or {}).items()):
+        h.update(fname.encode()); h.update(code.encode())
+    return h.hexdigest()[:16]
+
+
+def body_hash(body: str) -> str:
+    """Identity of the TEXT alone — no name, no scripts, no frontmatter.
+
+    Distinct from `artifact_hash` on purpose, because two questions want two
+    answers. "Is this the same artifact?" (lineage, the contamination denylist,
+    counting unique contaminants) must keep the name: `lexicon-doctrine` and
+    `lexicon2-doctrine` are different things to hold even when their prose
+    coincides. "Has the population converged on one doctrine?" (RQ2) must drop
+    it: the scripted oracle emits a single playbook text under a different name
+    for every family, and counting those as diversity is exactly the artefact
+    the README already flags when it says the scripted stand-in cannot speak to
+    monoculture. It cannot — and the metric should now say so rather than
+    reporting one distinct body per skill slot."""
+    return hashlib.sha256(body.strip().encode()).hexdigest()[:16]
+
+
 class SkillLibrary:
     def __init__(self, root: str | Path, owner: str):
         self.root = Path(root)
@@ -91,11 +122,36 @@ class SkillLibrary:
         sdir = self.root / name / "scripts"
         return {p.name: p.read_text() for p in sorted(sdir.glob("*.py"))} if sdir.exists() else {}
 
+    def body_hash(self, name: str) -> str:
+        """Text identity of one held skill. See module-level `body_hash`."""
+        return body_hash(self.body(name))
+
     def content_hash(self, name: str) -> str:
-        h = hashlib.sha256((self.root / name / "SKILL.md").read_text().encode())
-        for fname, code in sorted(self.scripts(name).items()):
-            h.update(fname.encode()); h.update(code.encode())
-        return h.hexdigest()[:16]
+        """Identity of what the skill SAYS, not of the file it is stored in.
+
+        This used to hash the whole SKILL.md, frontmatter included. Frontmatter
+        carries `version` and `provenance` (`author`, `imported_from`,
+        `origin_hash`), so two states holding a byte-identical doctrine hashed
+        differently the moment one of them had imported it. Three consequences,
+        all of which corrupted published numbers:
+
+          * `metrics.distinct_bodies` -- the direct monoculture signal for RQ2 --
+            counted provenance, not content. A population converged on ONE
+            doctrine reported as many distinct bodies as there were copies.
+          * `poison_spread.unique_offered` counted the same defect once per
+            laundering hop, so the count of distinct contaminants was inflated
+            by exactly the transitive spread the metric exists to measure.
+          * The exchange path in `experiment/grid.py` hashed name+body+scripts
+            while this hashed the file, so `origin_hash` in an importer's
+            provenance and `content_hash` on the matching `adoption_decision`
+            event lived in DIFFERENT hash spaces and could never be joined.
+            Lineage was unreconstructible from the log, which the README claims
+            it is.
+
+        Hashing the artifact rather than the file fixes all three and makes the
+        two schemes one. `artifact_hash` is the single definition; the exchange
+        path calls it on the exported dict and gets the same digest."""
+        return artifact_hash(name, self.body(name), self.scripts(name))
 
     def render_index(self) -> str:
         """Progressive-disclosure-lite: names + descriptions only (full bodies

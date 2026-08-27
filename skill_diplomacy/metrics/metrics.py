@@ -114,10 +114,23 @@ def mean_pairwise_similarity(libraries: list) -> float:
 
 
 def distinct_bodies(libraries: list) -> int:
-    """Number of distinct skill CONTENTS across the whole population. Falls as
-    one doctrine out-competes the rest — the direct monoculture signal."""
+    """Number of distinct skill TEXTS across the whole population. Falls as one
+    doctrine out-competes the rest — the direct monoculture signal.
+
+    Keyed on the body alone (`skills.format.body_hash`), which is what the name
+    claims and what RQ2 needs. It previously keyed on the whole SKILL.md, so the
+    frontmatter's `provenance.imported_from` was part of the digest and every
+    COPY of a doctrine counted as a new body: a population that had converged on
+    one text reported maximal diversity, the exact inverse of the truth. Keying
+    on the artifact hash instead would still over-count, because the scripted
+    oracle emits one playbook text under a different skill name per family.
+
+    Read it against `mean_pairwise_similarity`: similarity 1.0 with a body count
+    above 1 means the libraries overlap in text but are not identical; a body
+    count of 1 is full monoculture."""
+    from ..skills.format import body_hash
     seen = set()
     for lib in libraries:
         for name in lib.skill_names():
-            seen.add(lib.content_hash(name))
+            seen.add(body_hash(lib.body(name)))
     return len(seen)

@@ -21,6 +21,7 @@ refactor, and `run_v2.py` selects the new regime explicitly.
 """
 from __future__ import annotations
 
+import dataclasses
 import hashlib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -35,12 +36,14 @@ from ..bank.generators.unit_chain import UnitChainGenerator
 from ..bank.variants import make_bank
 from ..harness.budget import BudgetExceeded, BudgetMeter
 from ..harness.events import EventLog
+from ..harness.provenance import run_provenance
 from ..harness.model import ScriptedModel
 from ..institutions.exchange import ExchangeContext, make_policy
 from ..institutions.institutions import (AdversarialTrade, Autarky, Clubs,
                                          FreeTrade, is_poisoned_artifact,
                                          is_poisoned_body, poison_artifact)
 from ..institutions.quarantine import QuarantineLevel, run_quarantine
+from ..skills.format import artifact_hash
 from ..metrics.metrics import (adoption_edges, distinct_bodies, export_refusals,
                                gini, mean_pairwise_similarity, pass_k,
                                poison_spread, trials_by_task)
@@ -169,11 +172,49 @@ def _policies(cfg: TrialConfig, names: list[str]) -> dict:
     return pol
 
 
+ENDOWMENTS = ("uniform", "step", "zipf")
+
+
 def _weights(cfg: TrialConfig, n: int) -> list[int]:
-    """Shares of the family pool per state — the capability distribution."""
-    if cfg.endowment == "step" or cfg.n_great_powers:
+    """Shares of the family pool per state — the capability distribution.
+
+    Dispatches on `cfg.endowment` and nothing else. It used to branch on
+    `endowment == "step" or n_great_powers`, which made two silent traps:
+
+      * `--endowment step` WITHOUT `--great-powers` returned all-ones, i.e. it
+        ran `uniform` while reporting itself as a graded endowment. Every
+        relative-gains result over that arm was a parity run in disguise, and
+        parity is precisely the condition under which the realist mechanism is
+        definitionally inert — so the arm could not have shown an effect and its
+        null was uninformative rather than evidential.
+      * `--endowment zipf --great-powers 3` took the STEP branch and discarded
+        zipf entirely, while `_summarise` then labelled the run `"step"`
+        regardless of the flag actually passed.
+
+    A misconfiguration that changes which distribution you sampled must not be
+    recoverable only by reading the source, so both now raise."""
+    if cfg.endowment not in ENDOWMENTS:
+        raise ValueError(f"unknown endowment {cfg.endowment!r}; "
+                         f"expected one of {ENDOWMENTS}")
+    if cfg.endowment == "step":
+        if cfg.n_great_powers <= 0:
+            raise ValueError(
+                "endowment='step' needs n_great_powers > 0 (CLI: --great-powers). "
+                "Without it every state gets an equal share, which is 'uniform' "
+                "under a different name and silently removes the asymmetry the "
+                "step endowment exists to create.")
+        if cfg.n_great_powers >= n:
+            raise ValueError(
+                f"n_great_powers={cfg.n_great_powers} with n_states={n}: every "
+                "state would be a great power, which is 'uniform' again.")
         return [cfg.great_power_weight if i < cfg.n_great_powers else 1
                 for i in range(n)]
+    if cfg.n_great_powers:
+        raise ValueError(
+            f"n_great_powers={cfg.n_great_powers} is a 'step' parameter but "
+            f"endowment={cfg.endowment!r}. Pass --endowment step, or drop "
+            f"--great-powers; silently applying one while reporting the other "
+            f"is how a zipf run came to be published as a step run.")
     if cfg.endowment == "zipf":
         return [max(1, -(-cfg.great_power_weight // (i + 1))) for i in range(n)]
     return [1] * n
@@ -253,12 +294,15 @@ def _stable_hash(text: str) -> str:
 
 
 def _artifact_hash(artifact: dict) -> str:
-    h = hashlib.sha256()
-    h.update(artifact["name"].encode())
-    h.update(artifact["body"].encode())
-    for fname, code in sorted(artifact.get("scripts", {}).items()):
-        h.update(fname.encode()); h.update(code.encode())
-    return h.hexdigest()[:16]
+    """Delegates to the one definition of content identity (skills/format.py).
+
+    These were two separate implementations that disagreed: this one hashed
+    name+body+scripts, `SkillLibrary.content_hash` hashed the whole SKILL.md
+    including provenance frontmatter. Adoption events keyed on the first and
+    lineage (`origin_hash`) on the second, so the two could not be joined and
+    `distinct_bodies` counted copies rather than contents. One definition now."""
+    return artifact_hash(artifact["name"], artifact["body"],
+                         artifact.get("scripts", {}))
 
 
 def _poison_lookup(states: dict):
@@ -376,7 +420,7 @@ def _run_trial_in(cfg: TrialConfig, workdir: Path, model=None) -> dict:
                                        exporter=states[exporter_name],
                                        skill=skill, rnd=rnd)
 
-    return _summarise(cfg, log, states, capability_by_round, names, gens)
+    return _summarise(cfg, log, states, capability_by_round, names, gens, model)
 
 
 def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
@@ -460,7 +504,8 @@ def _consider_adoption(cfg, inst, log, model, gens, *, importer, exporter_name,
                probes_passed=report.probes_passed, probes_total=report.probes_total)
 
 
-def _summarise(cfg, log, states, capability_by_round, names, gens) -> dict:
+def _summarise(cfg, log, states, capability_by_round, names, gens,
+               model=None) -> dict:
     events = log.read()
     per_state = {}
     for n, st in states.items():
@@ -493,7 +538,13 @@ def _summarise(cfg, log, states, capability_by_round, names, gens) -> dict:
         # select a single one, and a wrong denominator here misreports every
         # capability figure that is read against it.
         "n_families": len(gens),
-        "endowment": cfg.endowment if not cfg.n_great_powers else "step",
+        # Who and what produced this number. Without it a live result cannot be
+        # attributed to a model, a date or a commit, and the harness/live status
+        # label every claim in the README depends on rests on memory.
+        "provenance": run_provenance(model, dataclasses.asdict(cfg)),
+        "endowment": cfg.endowment,   # the flag actually passed, not a guess
+        "n_great_powers": cfg.n_great_powers,
+        "great_power_weight": cfg.great_power_weight,
         "shard_sizes": {n: len(states[n].home_families) for n in names},
         "seed": cfg.seed,
         "states": per_state,

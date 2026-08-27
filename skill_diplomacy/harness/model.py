@@ -41,6 +41,13 @@ class ScriptedModel:
             self._i += 1
         return ModelResponse(text, _approx_tokens(system + prompt), _approx_tokens(text))
 
+    def describe(self) -> dict:
+        """Declares itself NOT live, which is what makes a summary's status
+        label derivable instead of hand-asserted."""
+        return {"client": "ScriptedModel", "live": False,
+                "kind": "policy_fn" if callable(self._script) else "queued_script",
+                "errors": 0, "calls": self._i}
+
 
 class AnthropicModel:
     """Real client (lazy import). Requires ANTHROPIC_API_KEY in the environment."""
@@ -55,10 +62,26 @@ class AnthropicModel:
         self._client = anthropic.Anthropic()
         self.model_id = model_id
         self.temperature = temperature
+        self.calls = 0
+        self.served_models: dict[str, int] = {}
 
     def complete(self, system: str, prompt: str, max_tokens: int = 800) -> ModelResponse:
         msg = self._client.messages.create(
             model=self.model_id, max_tokens=max_tokens, temperature=self.temperature,
             system=system, messages=[{"role": "user", "content": prompt}])
         text = "".join(b.text for b in msg.content if getattr(b, "type", "") == "text")
+        self.calls += 1
+        # `model_id` is what we asked for and may be a moving alias; the response
+        # carries what actually served the call. Recording only the former makes
+        # a live number unattributable to specific weights after the alias moves.
+        served = getattr(msg, "model", None)
+        if served:
+            self.served_models[served] = self.served_models.get(served, 0) + 1
         return ModelResponse(text, msg.usage.input_tokens, msg.usage.output_tokens)
+
+    def describe(self) -> dict:
+        return {"client": "AnthropicModel", "live": True,
+                "model_id_requested": self.model_id,
+                "models_served": dict(self.served_models),
+                "temperature": self.temperature,
+                "calls": self.calls, "errors": 0}
