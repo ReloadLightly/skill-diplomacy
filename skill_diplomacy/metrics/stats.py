@@ -33,10 +33,23 @@ from __future__ import annotations
 import random
 from itertools import combinations
 from math import comb, sqrt
-from statistics import NormalDist, mean, pstdev
+from statistics import NormalDist, mean, median, pstdev
 
 __all__ = ["wilson", "proportion", "bootstrap_ci", "permutation_test",
-           "min_achievable_p", "compare", "fmt"]
+           "min_achievable_p", "compare", "dispersion_test",
+           "all_or_nothing", "fmt"]
+
+
+def _round_p(p: float) -> float:
+    """Keep small p-values legible. `round(4.9998e-05, 4)` is 0.0, which would
+    print a Monte Carlo p as exactly zero — the very thing the +1 smoothing
+    exists to prevent."""
+    if p <= 0:
+        return 0.0
+    digits = 4
+    while round(p, digits) == 0.0 and digits < 12:
+        digits += 1
+    return round(p, digits)
 
 
 # -- proportions -------------------------------------------------------------
@@ -148,7 +161,7 @@ def permutation_test(a: list[float], b: list[float], two_sided: bool = True,
                 hits += 1
         # +1 smoothing: a Monte Carlo p of exactly 0 is not evidence of p=0
         p, method, n_perm = (hits + 1) / (reps + 1), "monte_carlo", reps
-    return {"observed": round(observed, 4), "p": round(p, 4), "method": method,
+    return {"observed": round(observed, 4), "p": _round_p(p), "method": method,
             "n_a": n_a, "n_b": n_b, "arrangements": n_perm,
             "two_sided": two_sided}
 
@@ -186,3 +199,73 @@ def fmt(d: dict) -> str:
     """`0.333 [0.333, 0.333] (n=3)` — the form a table cell should carry."""
     return (f"{d['mean']:.3f} [{d['ci_low']:.3f}, {d['ci_high']:.3f}] "
             f"(n={d['n']})")
+
+
+# -- dispersion --------------------------------------------------------------
+
+def dispersion_test(a: list[float], b: list[float], reps: int = 20_000,
+                    seed: int = 0) -> dict:
+    """Permutation test on a Levene-type statistic: mean absolute deviation
+    from the group median. Asks whether two arms differ in SPREAD.
+
+    This exists because a difference of means is the wrong test for the
+    fixed-versus-re-drawn probe comparison, and reporting it was hiding the
+    actual result. Across 24 deterministic seeds a fixed held-out probe suite
+    admitted either 0% or 100% of poisoned artifacts and NOTHING IN BETWEEN,
+    while a re-drawn suite produced rates in 0.08-0.56. The means are
+    indistinguishable (0.42 vs 0.33, p=0.44); the standard deviations are 0.493
+    against 0.112. What re-drawing buys is not a lower expected contamination
+    rate but the elimination of correlated, population-wide screening failure —
+    a fixed detector set has holes, and every importer falls into the same one
+    at the same time. That is tail risk, and a mean cannot see it."""
+    a, b = list(a), list(b)
+    if len(a) < 2 or len(b) < 2:
+        return {"p": 1.0, "note": "need at least two observations per arm"}
+
+    def stat(xs: list[float]) -> float:
+        m = median(xs)
+        return sum(abs(x - m) for x in xs) / len(xs)
+
+    observed = abs(stat(a) - stat(b))
+    pool, n_a = a + b, len(a)
+    rng = random.Random(seed)
+    total = comb(len(pool), n_a)
+    if total <= 20_000:
+        hits = 0
+        idx = range(len(pool))
+        for pick in combinations(idx, n_a):
+            rest = set(pick)
+            sa = [pool[i] for i in pick]
+            sb = [pool[i] for i in idx if i not in rest]
+            if abs(stat(sa) - stat(sb)) >= observed - 1e-12:
+                hits += 1
+        p, method = hits / total, "exact"
+    else:
+        hits = 0
+        for _ in range(reps):
+            sh = pool[:]
+            rng.shuffle(sh)
+            if abs(stat(sh[:n_a]) - stat(sh[n_a:])) >= observed - 1e-12:
+                hits += 1
+        p, method = (hits + 1) / (reps + 1), "monte_carlo"
+    sd_a, sd_b = pstdev(a), pstdev(b)
+    return {"mad_a": round(stat(a), 4), "mad_b": round(stat(b), 4),
+            "sd_a": round(sd_a, 4), "sd_b": round(sd_b, 4),
+            "sd_ratio": round(sd_a / sd_b, 2) if sd_b else None,
+            "p": _round_p(p), "method": method}
+
+
+def all_or_nothing(values: list[float], tol: float = 1e-9) -> dict:
+    """How much of an arm's mass sits at the extremes.
+
+    A screen whose per-population outcome is always 0 or 1 is not screening
+    probabilistically at all; it is a coin flip on the whole population, and
+    summarising it by its mean describes an outcome that never occurs."""
+    n = len(values)
+    if not n:
+        return {"n": 0, "fraction_extreme": 0.0}
+    at0 = sum(1 for v in values if abs(v) <= tol)
+    at1 = sum(1 for v in values if abs(v - 1.0) <= tol)
+    return {"n": n, "at_zero": at0, "at_one": at1,
+            "fraction_extreme": round((at0 + at1) / n, 4),
+            "is_all_or_nothing": (at0 + at1) == n}

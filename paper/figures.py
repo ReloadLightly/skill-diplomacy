@@ -14,10 +14,10 @@ the argument's work, in the order the argument makes them:
                        intervals and the exact-permutation p-floor annotated, so
                        the design limit is on the figure rather than in a
                        footnote a reviewer has to find.
-  fig3_screening       the security finding. Admitted-defect rate against
-                       governance overhead for each quarantine tier, fixed
-                       versus re-drawn probes — the "held out matters less than
-                       re-drawn" result.
+  fig3_screening       the security finding. Per-seed admitted-defect rate for
+                       a fixed versus a re-drawn probe suite. A strip plot, not
+                       bars: the result is that the fixed arm is all-or-nothing,
+                       which a mean hides and in fact already misreported once.
   fig4_inequality      the realist result. Mean capability and Gini against the
                        relative-gains dial k, showing the monotone fall in one
                        and the interior maximum in the other.
@@ -32,10 +32,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from skill_diplomacy.metrics.stats import (bootstrap_ci, min_achievable_p,
+from skill_diplomacy.metrics.stats import (all_or_nothing, bootstrap_ci,
+                                           dispersion_test, min_achievable_p,
                                            permutation_test, wilson)
 
-from .svg import (INK, MUTED, SERIES, Axes, grouped_bars, hrule, line,
+from .svg import (INK, MUTED, SERIES, Axes, grouped_bars, hrule, line, strip,
                   xticks_linear)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -122,41 +123,45 @@ def fig2_two_contrasts() -> str:
 
 
 def fig3_screening() -> str:
+    """The finding is a difference in SPREAD, not in mean, so the figure is a
+    strip plot. Bars of means were how the published version of this result came
+    to be wrong: `runs/probe_coverage.json` at 5 seeds gave the fixed arm a mean
+    of 0.80, which was a sampling accident of how many of five seeds happened to
+    land in each mode. At 24 seeds the mean is 0.42 and the means of the two arms
+    are indistinguishable (p = 0.44). What separates them is that every fixed-suite
+    seed is exactly 0 or exactly 1."""
     rows = json.loads((RUNS / "probe_coverage.json").read_text())
-    ax = Axes(width=780, height=440, ymin=0.0, ymax=1.05,
-              title="Whether a screen is re-drawn matters more than whether it is held out",
-              subtitle=("harness (scripted null model), 5 seeds; a defect corrupting one row "
-                        "of an eight-row reference table"),
-              ylabel="fraction of poisoned artifacts admitted",
-              xlabel="governance overhead (share of budget spent screening)")
-    ax.gridlines([0, 0.25, 0.5, 0.75, 1.0])
-    hrule(ax, 1.0, "no screening at all", colour="#b91c1c")
+    probes_tier = "regression_plus_probes"
+    by = {r["probes"]: r for r in rows if r["quarantine"] == probes_tier}
+    if "admitted_by_seed" not in by.get("fixed", {}):
+        return ""      # artifact predates per-seed reporting; re-run run_probes.py
+    fixed, fresh = by["fixed"]["admitted_by_seed"], by["fresh"]["admitted_by_seed"]
+    n = len(fixed)
+    disp = dispersion_test(fixed, fresh)
+    mean_p = permutation_test(fixed, fresh)["p"]
+    aon = all_or_nothing(fixed)
 
-    xlo, xhi = 0.0, 0.75
-    xticks_linear(ax, [0.0, 0.15, 0.3, 0.45, 0.6, 0.75], xlo, xhi)
-    for si, mode in enumerate(("fixed", "fresh")):
-        pts = [r for r in rows if r["probes"] == mode]
-        order = {"none": 0, "regression": 1, "regression_plus_probes": 2}
-        pts.sort(key=lambda r: order[r["quarantine"]])
-        line(ax, [r["governance_overhead"] for r in pts],
-             [r["admitted_rate"] for r in pts], SERIES[si],
-             label=f"{mode} probes", xlo=xlo, xhi=xhi)
-        for r in pts:
-            x = ax.sx_linear(r["governance_overhead"], xlo, xhi)
-            y = ax.sy(r["admitted_rate"])
-            short = {"none": "none", "regression": "regression",
-                     "regression_plus_probes": "+ probes"}[r["quarantine"]]
-            ax.text(x, y - 11, short, size=10, fill=MUTED)
+    ax = Axes(width=780, height=470, ymin=-0.05, ymax=1.08,
+              title="A fixed held-out screen fails all-or-nothing across the whole population",
+              subtitle=(f"harness (scripted null model), {n} seeds, adversarial trade; one dot per seed. "
+                        "A defect corrupts one row of an eight-row reference table."),
+              ylabel="fraction of poisoned artifacts admitted")
+    ax.gridlines([0, 0.25, 0.5, 0.75, 1.0])
+    strip(ax, [(f"probes drawn once per round, reused (n={n})", fixed),
+               (f"probes re-drawn per screening event (n={n})", fresh)])
     ax.frame()
-    ax.legend([("probes drawn once per round, reused", SERIES[0]),
-               ("probes re-drawn per screening event", SERIES[1])])
+    ax.text(ax.x0, ax.height - 47,
+            f"Every one of {aon['n']} fixed-suite seeds admitted either 0% or 100% — "
+            f"{aon['at_one']} misses, {aon['at_zero']} catches, nothing between.",
+            size=10.5, anchor="start", fill=MUTED)
     ax.text(ax.x0, ax.height - 34,
-            "Home-shard regression pays 23% of the budget and admits 100%: expensive and perfectly blind.",
+            f"The arms' MEANS are indistinguishable (p = {mean_p:.2f}); their spreads are not "
+            f"(sd {disp['sd_a']:.2f} vs {disp['sd_b']:.2f}, ratio {disp['sd_ratio']}, p = {disp['p']:.0e}).",
             size=10.5, anchor="start", fill=MUTED)
     ax.text(ax.x0, ax.height - 21,
-            "A fixed held-out suite has one hole and every importer falls into it at once (80% admitted); "
-            "re-drawing cuts that to 29%.",
-            size=10.5, anchor="start", fill=MUTED)
+            "Re-drawing does not buy a lower expected contamination rate. It buys the removal of "
+            "correlated, population-wide screening failure.",
+            size=10.5, anchor="start", fill=INK)
     return ax.render()
 
 

@@ -114,3 +114,58 @@ def test_monte_carlo_kicks_in_for_large_designs_and_never_returns_zero():
 
 def test_fmt_is_a_table_cell():
     assert fmt(bootstrap_ci([1.0, 1.0, 1.0])) == "1.000 [1.000, 1.000] (n=3)"
+
+
+# ---------------------------------------------------------------------------
+# dispersion — the statistic the probe-coverage result actually needs
+# ---------------------------------------------------------------------------
+
+from skill_diplomacy.metrics.stats import all_or_nothing, dispersion_test  # noqa: E402
+
+# Measured, 24 deterministic seeds, `python run_probes.py --seeds 24`.
+FIXED_24 = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+            1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+FRESH_24 = [0.24, 0.4, 0.16, 0.24, 0.44, 0.44, 0.28, 0.24, 0.48, 0.48, 0.28, 0.24,
+            0.32, 0.36, 0.44, 0.36, 0.32, 0.36, 0.36, 0.56, 0.08, 0.24, 0.24, 0.44]
+
+
+def test_a_fixed_probe_suite_is_all_or_nothing():
+    """The mechanism D'haeseleer, Forrest & Helman (1996) proved: a finite
+    self-derived detector set has holes. Here every importer in a population
+    screens against the SAME draw, so they all fall into the same hole at once —
+    and the per-population outcome is 0 or 1, never in between."""
+    a = all_or_nothing(FIXED_24)
+    assert a["is_all_or_nothing"] is True
+    assert a["fraction_extreme"] == 1.0
+    assert a["at_zero"] + a["at_one"] == 24
+
+
+def test_re_drawing_probes_removes_the_all_or_nothing_behaviour():
+    a = all_or_nothing(FRESH_24)
+    assert a["is_all_or_nothing"] is False
+    assert a["fraction_extreme"] == 0.0
+
+
+def test_the_two_arms_differ_in_spread_not_in_mean():
+    """This is why the published '80% vs 29%' was the wrong statistic. A mean
+    cannot distinguish these arms; a dispersion test separates them decisively."""
+    means = permutation_test(FIXED_24, FRESH_24)
+    spread = dispersion_test(FIXED_24, FRESH_24)
+    assert means["p"] > 0.1, "the means are not distinguishable"
+    assert spread["p"] < 0.01, "the spreads are"
+    assert spread["sd_ratio"] > 4
+
+
+def test_the_published_eighty_percent_was_a_small_sample_accident():
+    """runs/probe_coverage.json at 5 seeds gave the fixed arm 0.80. Because each
+    seed contributes exactly 0 or 1, that figure is just 'four of five seeds
+    happened to miss' — at 24 seeds it is 0.42."""
+    from statistics import mean as _mean
+    assert _mean(FIXED_24[:5]) == pytest.approx(0.8)
+    assert _mean(FIXED_24) == pytest.approx(0.4167, abs=1e-3)
+
+
+def test_a_monte_carlo_p_is_never_reported_as_exactly_zero():
+    """+1 smoothing was in place but `round(p, 4)` printed 4.9998e-05 as 0.0."""
+    p = dispersion_test(FIXED_24, FRESH_24)["p"]
+    assert p > 0.0

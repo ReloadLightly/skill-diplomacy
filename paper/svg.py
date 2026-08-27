@@ -198,3 +198,34 @@ def hrule(ax: Axes, y: float, label: str = "", colour: str = MUTED,
            f'stroke="{colour}" stroke-width="1.2" stroke-dasharray="{dash}"/>')
     if label:
         ax.text(ax.x1 - 4, py - 6, label, size=10.5, anchor="end", fill=colour)
+
+
+def strip(ax: Axes, groups: list[tuple[str, list[float]]], jitter: float = 0.0,
+          radius: float = 4.0) -> None:
+    """One dot per replicate, per group.
+
+    Used where a bar of means would hide the result rather than show it. The
+    fixed-probe arm's admitted rate is 0 or 1 in every seed and never anything
+    else; its mean of 0.42 describes an outcome that does not occur. A strip
+    plot makes the bimodality the thing you see first, which is what the finding
+    actually is."""
+    n = len(groups)
+    band = (ax.x1 - ax.x0) / max(1, n)
+    for gi, (label, vals) in enumerate(groups):
+        centre = ax.x0 + band * (gi + 0.5)
+        colour = SERIES[gi % len(SERIES)]
+        # deterministic fan-out for overlapping points, so the figure is stable
+        seen: dict[float, int] = {}
+        for v in vals:
+            key = round(v, 4)
+            k = seen.get(key, 0)
+            seen[key] = k + 1
+            offset = ((k % 9) - 4) * (radius * 2.05)
+            ax.add(f'<circle cx="{centre + offset:.1f}" cy="{ax.sy(v):.1f}" '
+                   f'r="{radius}" fill="{colour}" opacity="0.75"/>')
+        m = sum(vals) / len(vals) if vals else 0.0
+        y = ax.sy(m)
+        ax.add(f'<line x1="{centre-52:.1f}" y1="{y:.1f}" x2="{centre+52:.1f}" '
+               f'y2="{y:.1f}" stroke="{INK}" stroke-width="2"/>')
+        ax.text(centre + 60, y + 4, f"mean {m:.2f}", size=10.5, anchor="start", fill=MUTED)
+        ax.text(centre, ax.y0 + 20, label, size=12)
